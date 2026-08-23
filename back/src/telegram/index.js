@@ -304,7 +304,14 @@ function getBot() {
 
 function stopBot(reason = 'shutdown') {
   if (app) {
-    app.stop(reason);
+    try {
+      app.stop(reason);
+    } catch (error) {
+      // send-only clients were never launched
+      if (!/not running/i.test(String(error.message || error))) {
+        console.error('Telegram stop:', error.message || error);
+      }
+    }
     app = null;
   }
 

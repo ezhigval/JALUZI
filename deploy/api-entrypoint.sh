@@ -4,7 +4,7 @@ set -eu
 DATA_ROOT="${STORAGE_DIR:-/var/data/jaluzi}"
 mkdir -p "$DATA_ROOT/data" "$DATA_ROOT/uploads/products"
 
-if [ ! -f "$DATA_ROOT/data/db.db" ] && [ ! -f "$DATA_ROOT/data/db.json" ]; then
+if [ ! -f "$DATA_ROOT/data/db.db" ] && [ ! -f "$DATA_ROOT/data/db.json" ] && [ ! -f "$DATA_ROOT/data/db.json.migrated" ]; then
   if [ -f /app/data/db.seed.json ]; then
     cp /app/data/db.seed.json "$DATA_ROOT/data/db.json"
   fi

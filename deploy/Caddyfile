@@ -6,6 +6,37 @@ www.piter-jaluzi.ru {
 	redir https://piter-jaluzi.ru{uri} permanent
 }
 
+# HTTP by IP / before DNS cutover. After A-records point here, Caddy upgrades
+# piter-jaluzi.ru to HTTPS automatically.
+:80 {
+	encode gzip
+
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+
+	@publicApi path /api/products* /api/orders* /api/reviews*
+	handle @publicApi {
+		reverse_proxy api:3001
+	}
+
+	handle /uploads/* {
+		reverse_proxy api:3001
+	}
+
+	handle /health {
+		reverse_proxy api:3001
+	}
+
+	handle {
+		root * /srv
+		try_files {path} {path}/ {path}.html
+		file_server
+	}
+}
+
 piter-jaluzi.ru {
 	encode gzip
 
@@ -16,7 +47,6 @@ piter-jaluzi.ru {
 		-Server
 	}
 
-	# Public surface only. Worker (Telegram/IMAP) has no ingress here.
 	@publicApi path /api/products* /api/orders* /api/reviews*
 	handle @publicApi {
 		reverse_proxy api:3001
