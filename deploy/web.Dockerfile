@@ -1,4 +1,4 @@
-FROM node:22-alpine AS build
+FROM mirror.gcr.io/library/node:22-alpine AS build
 
 WORKDIR /app
 COPY front/package.json front/package-lock.json ./
@@ -12,6 +12,7 @@ ENV SITE_URL=$SITE_URL
 
 RUN npm run build
 
+# caddy official image; if Hub is blocked, reuse the already-running web image and docker cp Caddyfile.
 FROM caddy:2.10-alpine
 COPY deploy/Caddyfile /etc/caddy/Caddyfile
 COPY --from=build /app/dist /srv

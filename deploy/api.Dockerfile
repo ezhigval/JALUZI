@@ -1,4 +1,5 @@
-FROM node:22-bookworm-slim
+# mirror.gcr.io is reachable from Yandex Cloud RU; Docker Hub often times out.
+FROM mirror.gcr.io/library/node:22-bookworm-slim
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends python3 make g++ \

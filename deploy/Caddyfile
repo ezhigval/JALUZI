@@ -22,6 +22,11 @@ piter-jaluzi.ru {
 		reverse_proxy api:3001
 	}
 
+	# Secret-protected autodeploy hook (Authorization: Bearer $DEPLOY_HOOK_SECRET)
+	handle /internal/* {
+		reverse_proxy api:3001
+	}
+
 	handle /uploads/* {
 		reverse_proxy api:3001
 	}

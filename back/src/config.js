@@ -66,8 +66,15 @@ module.exports = {
     host: process.env.EMAIL_HOST || '',
     port: Number(process.env.EMAIL_PORT) || 587,
     user: process.env.EMAIL_USER || '',
-    pass: process.env.EMAIL_PASS || ''
+    pass: process.env.EMAIL_PASS || '',
+    secure:
+      process.env.EMAIL_SECURE === undefined || process.env.EMAIL_SECURE === ''
+        ? undefined
+        : ['1', 'true', 'yes', 'on'].includes(
+            String(process.env.EMAIL_SECURE).trim().toLowerCase()
+          )
   },
+  deployHookSecret: process.env.DEPLOY_HOOK_SECRET || '',
   incomingEmail: {
     user: process.env.INCOMING_EMAIL_USER || '',
     pass: process.env.INCOMING_EMAIL_PASS || '',

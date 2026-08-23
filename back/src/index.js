@@ -18,6 +18,7 @@ const publicReviewsRouter = require('./routes/publicReviews');
 const productsRouter = require('./routes/products');
 const ordersRouter = require('./routes/orders');
 const reviewsRouter = require('./routes/reviews');
+const opsRouter = require('./routes/ops');
 const { initBot, stopBot } = require('./telegram');
 const { initEmailListener, stopEmailListener } = require('./services/emailListener');
 
@@ -108,6 +109,7 @@ if (runHttp) {
   }
 
   app.use('/api/orders', orderLimiter, ordersRouter);
+  app.use('/internal', opsRouter);
 
   app.get('/health', (req, res) => {
     res.json({

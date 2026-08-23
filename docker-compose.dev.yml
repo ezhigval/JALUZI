@@ -4,10 +4,21 @@
 #
 # Site + API (same origin): http://localhost:8080
 # Direct API:               http://localhost:3001
+# Mailpit UI:               http://localhost:8025
 
 name: piter-jaluzi-dev
 
 services:
+  mailpit:
+    image: ghcr.io/axllent/mailpit:v1.21
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "1"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "1"
+    restart: unless-stopped
+
   api:
     build:
       context: .
@@ -22,10 +33,19 @@ services:
       CORS_ORIGIN: http://localhost:8080,http://127.0.0.1:8080,http://localhost:4321
       PUBLIC_API_BASE_URL: http://localhost:8080
       API_URL: http://localhost:8080
+      EMAIL_HOST: mailpit
+      EMAIL_PORT: "1025"
+      EMAIL_USER: orders@piter-jaluzi.local
+      EMAIL_PASS: ""
+      EMAIL_SECURE: "false"
+      INCOMING_EMAIL_HOST: ""
+      INCOMING_EMAIL_PASS: ""
     volumes:
       - jaluzi-data:/var/data/jaluzi
     ports:
       - "3001:3001"
+    depends_on:
+      - mailpit
     restart: unless-stopped
     healthcheck:
       test:

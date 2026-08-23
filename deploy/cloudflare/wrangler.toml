@@ -1,0 +1,6 @@
+name = "piter-jaluzi-tg-proxy"
+main = "telegram-proxy-worker.js"
+compatibility_date = "2026-08-23"
+
+# Optional: wrangler secret put WORKER_SHARED_SECRET
+# Then set the same value as a custom header from the app if you harden the proxy.

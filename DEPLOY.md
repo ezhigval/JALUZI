@@ -1,94 +1,65 @@
-# Deploy: Яндекс Облако + REG.RU DNS + Cloudflare для Telegram
+# Deploy: Яндекс Облако + Mailpit + Cloudflare Telegram + GitHub autodeploy
 
-Дата актуализации: 2026-08-23
+Дата актуализации: 2026-08-24
 
 Канонический git-репозиторий: `https://github.com/ezhigval/JALUZI`.
 
 Прод — одна Ubuntu VM в Yandex Cloud. Фронт и публичный API на `https://piter-jaluzi.ru`.
-Telegram admin bot и IMAP listener работают во внутреннем контейнере `worker` без открытых портов.
+Telegram admin bot работает во `worker`. Исходящие заявки пишутся в **Mailpit** (SMTP внутри compose).
 Исходящие запросы к Telegram идут через Cloudflare Worker (`TELEGRAM_API_ROOT`).
 
-Домен остаётся на REG.RU. Почта остаётся на `mail.hosting.reg.ru`. A-записи правятся вручную.
+Домен DNS остаётся на REG.RU. MX для боевой почты не трогаем; локальный Mailpit — только исходящие заявки с сайта.
 
 ## Модель безопасности
 
 | Слой | Что открыто | Что закрыто |
 | --- | --- | --- |
-| Интернет → Caddy `:80/:443` | статика, `GET /api/products`, `POST /api/orders`, `GET\|POST /api/reviews`, `GET /api/reviews/works`, `/uploads`, `/health` | admin CRUD товаров/работ/отзывов, Telegram, IMAP |
-| Docker network `backend` | `api` ↔ `worker` через общий том данных | нет publish портов worker |
+| Интернет → Caddy `:80/:443` | статика, публичный API, `/health`, `/internal/*` только с `DEPLOY_HOOK_SECRET` | admin CRUD, Telegram, IMAP |
+| Docker `backend` | `api` ↔ `worker` ↔ `mailpit:1025` | Mailpit UI только `127.0.0.1:8025` |
 | Исходящий Telegram | Cloudflare Worker → `api.telegram.org` | прямой доступ с VM к Telegram не обязателен |
 
-Админка — только Telegram-бот во `worker`. Публичный HTTP в production не создаёт и не удаляет товары и работы.
+Админка — только Telegram-бот во `worker`.
 
-## VM
+## VM (актуально)
 
 | Поле | Значение |
 | --- | --- |
-| Instance ID | `fv41g9i64264k1j55ogh` |
-| Login | `jaluzi-admin` |
-| Публичный IPv4 | `158.160.226.47` |
-| Каталог на диске | `/opt/piter-jaluzi` |
+| Hostname | `compute-vm-2-2-20-ssd-1787471749812` |
+| Login | `smailikin70` |
+| Публичный IPv4 | `158.160.139.202` |
+| Каталог | `/opt/piter-jaluzi` |
+
+Inbound SSH с чужих сетей часто режется до eth0. Рабочие каналы доступа:
+
+1. **GitHub autodeploy** (основной, без лимита 60 мин) — VM сама тянет git каждые 2 минуты.
+2. **HTTPS hook** `POST /internal/deploy` + `Authorization: Bearer $DEPLOY_HOOK_SECRET`.
+3. **Cloudflare Tunnel** (`deploy/install-cloudflared.sh`) — постоянный SSH без открытия :22 в интернет.
+4. Временный Pinggy reverse tunnel — только пока сессия жива.
 
 ## 1. Локальный запуск
-
-### Backend
-
-```bash
-cd back
-cp .env.example .env
-npm install
-npm run dev
-```
-
-`PROCESS_ROLE=all` поднимает HTTP + Telegram + IMAP в одном процессе.
-В `NODE_ENV=development` HTTP ещё отдаёт admin CRUD (только для локальной отладки).
-
-### Frontend
-
-```bash
-cd front
-cp .env.example .env.local
-npm install
-npm run dev
-```
-
-### Docker, как в проде, но по HTTP
 
 ```bash
 cp .env.example .env
 docker compose -f docker-compose.dev.yml up --build
 ```
 
-Сайт: `http://localhost:8080`. Let's Encrypt не используется.
+- сайт: http://localhost:8080  
+- Mailpit UI: http://localhost:8025  
 
-## 2. DNS на REG.RU
-
-Оставьте NS и почтовые записи как есть. После того как VM получила постоянный IPv4:
+## 2. DNS
 
 | Тип | Хост | Значение |
 | --- | --- | --- |
-| A | `@` | `158.160.226.47` |
-| A | `www` | `158.160.226.47` |
+| A | `@` | `158.160.139.202` |
+| A | `www` | `158.160.139.202` |
 
-Не трогайте MX / SPF / DKIM / DMARC и `mail.*`.
-
-Проверка:
-
-```bash
-dig +short A piter-jaluzi.ru
-dig +short MX piter-jaluzi.ru
-```
-
-Caddy получит сертификат только когда A-записи уже резолвятся на эту машину.
+MX / SPF / DKIM не трогать.
 
 ## 3. Cloudflare Worker для Telegram
 
-С машины с Node и аккаунтом Cloudflare:
-
 ```bash
-npx wrangler deploy deploy/cloudflare/telegram-proxy-worker.js \
-  --name piter-jaluzi-tg-proxy \
-  --compatibility-date 2026-08-23
+cd deploy/cloudflare
+npx wrangler deploy
 ```
 
 В `.env` на VM:
@@ -97,103 +68,65 @@ npx wrangler deploy deploy/cloudflare/telegram-proxy-worker.js \
 TELEGRAM_API_ROOT=https://piter-jaluzi-tg-proxy.<subdomain>.workers.dev
 ```
 
-Без этого worker на Yandex Cloud в РФ часто не достучится до `api.telegram.org`.
-
-## 4. Первый запуск на Ubuntu
-
-С локальной машины (ключ из консоли Yandex Cloud, zip `ssh-key-*.zip`):
-
-```bash
-unzip ssh-key-*.zip -d ~/.ssh
-chmod 600 ~/.ssh/ssh-key-*
-ssh -i ~/.ssh/ssh-key-<id> -l jaluzi-admin 158.160.226.47
-```
-
-Или через YC CLI:
-
-```bash
-yc compute ssh \
-  --id fv41g9i64264k1j55ogh \
-  --identity-file ~/.ssh/ssh-key-<id> \
-  --login jaluzi-admin
-```
-
-На VM:
-
-```bash
-sudo apt-get update
-sudo apt-get install -y git
-sudo git clone https://github.com/ezhigval/JALUZI.git /opt/piter-jaluzi
-cd /opt/piter-jaluzi
-sudo ./deploy/setup-ubuntu.sh
-sudo nano /opt/piter-jaluzi/.env
-sudo ./deploy/deploy.sh
-```
-
-В `.env` обязательны: Telegram, почта, `TELEGRAM_API_ROOT`, `ACME_EMAIL`.
-Шаблон — корневой `.env.example`.
-
-Проверка до переключения DNS:
-
-```bash
-curl -fsS http://158.160.226.47/health
-curl -H 'Host: piter-jaluzi.ru' http://158.160.226.47/api/products
-```
-
-После DNS + HTTPS:
-
-```bash
-curl -fsS https://piter-jaluzi.ru/health
-curl -fsS https://piter-jaluzi.ru/api/products
-```
-
-## 5. Перенос данных
-
-На ноутбуке:
-
-```bash
-./deploy/pack-local-data.sh
-scp -i ~/.ssh/ssh-key-<id> /tmp/jaluzi-data.tar.gz jaluzi-admin@158.160.226.47:/tmp/
-```
-
-На VM, после первого `docker compose up`:
+## 4. Первый запуск / обновление на VM
 
 ```bash
 cd /opt/piter-jaluzi
-docker compose -p piter-jaluzi stop api worker
-docker run --rm \
-  -v piter-jaluzi_jaluzi-data:/var/data/jaluzi \
-  -v /tmp/jaluzi-data.tar.gz:/tmp/jaluzi-data.tar.gz \
-  alpine sh -c 'mkdir -p /var/data/jaluzi && tar -xzf /tmp/jaluzi-data.tar.gz -C /var/data/jaluzi'
-docker compose -p piter-jaluzi start api worker
+cp -n .env.example .env   # затем заполнить секреты
+sudo ./deploy/install-autodeploy.sh
+./deploy/deploy.sh
 ```
 
-Если архив не копировать, API поднимет каталог из `back/data/db.seed.json` и фото из `back/src/uploads/products`.
-
-## 6. Обновление сайта
+Mailpit UI с ноутбука:
 
 ```bash
-cd /opt/piter-jaluzi
-sudo ./deploy/deploy.sh
+ssh -L 8025:127.0.0.1:8025 smailikin70@158.160.139.202
+# открыть http://127.0.0.1:8025
 ```
 
-Скрипт делает `git pull`, пересобирает фронт и API, перезапускает контейнеры.
+## 5. Постоянный доступ агента (не Pinggy)
 
-## 7. Почта и Telegram
+### A. Autodeploy с GitHub (рекомендуется)
 
-Почтовый ящик `info@piter-jaluzi.ru` остаётся на REG.RU.
+```bash
+sudo ./deploy/install-autodeploy.sh
+```
 
-- SMTP: `mail.hosting.reg.ru:465`
-- IMAP: `mail.hosting.reg.ru:993`
+Пуш в tracked branch (`AUTODEPLOY_BRANCH`, по умолчанию `main`) → VM сама `git pull` + `compose up` за ~2 минуты.  
+Лог: `deploy/logs/autodeploy.log`.
 
-VM только ходит туда наружу. Отдельный почтовый сервер на виртуалке не нужен.
+Опционально сразу после пуша:
 
-Telegram-бот работает long polling из контейнера `worker`. Откройте бота и авторизуйтесь паролем из `.env`.
+```bash
+curl -X POST -H "Authorization: Bearer $DEPLOY_HOOK_SECRET" \
+  https://piter-jaluzi.ru/internal/deploy
+```
 
-## 8. Что выключить после переезда
+### B. Cloudflare Tunnel (постоянный SSH)
 
-- Render web service `piter-jaluzi-backend`
-- статическую заливку `front/dist/` на хостинг REG.RU
-- старые `PUBLIC_API_URL` вида `*.onrender.com`
+```bash
+export CLOUDFLARED_TUNNEL_TOKEN='…'
+sudo ./deploy/install-cloudflared.sh
+```
 
-Пока DNS не переключили, текущий сайт на REG.RU + Render продолжит работать.
+В Zero Trust привяжите hostname → `ssh://localhost:22`.
+
+## 6. Почта
+
+По умолчанию исходящие заявки → **Mailpit** (`EMAIL_HOST=mailpit`, порт `1025`).  
+IMAP listener выключен (`INCOMING_EMAIL_HOST=` пустой), пока REG.RU пароль не починен.
+
+Вернуть REG.RU SMTP:
+
+```env
+EMAIL_HOST=mail.hosting.reg.ru
+EMAIL_PORT=465
+EMAIL_SECURE=true
+EMAIL_USER=info@piter-jaluzi.ru
+EMAIL_PASS=…
+```
+
+## 7. Образы без Docker Hub
+
+`deploy/api.Dockerfile` берёт Node с `mirror.gcr.io`.  
+Mailpit — с `ghcr.io/axllent/mailpit` (Hub с VM часто timeout).

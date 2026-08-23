@@ -21,3 +21,7 @@ front/dist/
 test-results/
 *.log
 deploy/certbot/
+deploy/logs/
+deploy/secrets/
+.autodeploy.lock/
+.runtime-data/
