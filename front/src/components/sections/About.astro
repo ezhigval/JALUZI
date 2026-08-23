@@ -1,0 +1,42 @@
+---
+import config from '../../data/config.json';
+---
+<section id="about" style="padding:4rem 1.5rem;">
+  <div style="max-width:1200px;margin:0 auto;">
+    <h2 style="text-align:center;font-size:clamp(1.5rem, 4vw, 2.5rem);margin-bottom:2rem;color:#0F172A;">О компании</h2>
+    
+    <div class="about-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:center;margin-bottom:3rem;">
+      <div class="about-image">
+        <img src="/about.jpeg" alt="Наш офис" style="width:100%;border-radius:1rem;box-shadow:0 10px 30px rgba(0,0,0,0.1);" />
+      </div>
+      <div class="about-text" style="color:#64748B;line-height:1.8;font-size:1rem;">
+        <p style="margin-bottom:1.5rem;">Мы производим жалюзи с 2006 года. За это время установили более 15 000 изделий в квартирах, домах и офисах Санкт-Петербурга.</p>
+        <p style="margin-bottom:1.5rem;">Собственное производство позволяет нам контролировать качество на всех этапах и предлагать лучшие цены.</p>
+      </div>
+    </div>
+    
+    <div class="stats-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:2rem;">
+      <div style="background:#F8FAFC;padding:1.5rem;border-radius:1rem;text-align:center;">
+        <div style="font-size:clamp(1.5rem, 4vw, 2.5rem);font-weight:bold;color:#2563EB;margin-bottom:0.5rem;">{config.stats.years}+</div>
+        <div style="color:#64748B;font-size:0.9rem;">лет на рынке</div>
+      </div>
+      <div style="background:#F8FAFC;padding:1.5rem;border-radius:1rem;text-align:center;">
+        <div style="font-size:clamp(1.5rem, 4vw, 2.5rem);font-weight:bold;color:#2563EB;margin-bottom:0.5rem;">{parseInt(config.stats.installations)/1000}к+</div>
+        <div style="color:#64748B;font-size:0.9rem;">установок</div>
+      </div>
+      <div style="background:#F8FAFC;padding:1.5rem;border-radius:1rem;text-align:center;">
+        <div style="font-size:clamp(1.5rem, 4vw, 2.5rem);font-weight:bold;color:#2563EB;margin-bottom:0.5rem;">{config.stats.warranty}</div>
+        <div style="color:#64748B;font-size:0.9rem;">гарантии</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  @media (max-width: 768px) {
+    .about-grid { grid-template-columns: 1fr !important; }
+    .about-image { order: 1; }
+    .about-text { order: 2; }
+    .stats-grid { grid-template-columns: 1fr !important; }
+  }
+</style>

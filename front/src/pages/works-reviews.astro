@@ -1,0 +1,221 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import OrderModal from '../components/ui/OrderModal.astro';
+import config from '../data/config.json';
+---
+<BaseLayout 
+  title={`Наши работы и отзывы | ${config.company.name}`}
+  description="Посмотрите наши выполненные работы и отзывы клиентов. Реальные фото установленных жалюзи."
+  canonical="/works-reviews"
+>
+  <OrderModal />
+  <Header />
+  
+  <main>
+    <!-- Hero Section -->
+    <section class="section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4rem 0;">
+      <div class="container" style="text-align: center;">
+        <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Наши работы и отзывы</h1>
+        <p style="font-size: 1.2rem; opacity: 0.9; max-width: 600px; margin: 0 auto;">
+          Реальные фото установленных жалюзи и честные отзывы наших клиентов
+        </p>
+      </div>
+    </section>
+
+    <!-- Наши работы (Слайдер) -->
+    <section class="section" id="works">
+      <div class="container">
+        <h2 class="section-title">🖼️ Наши работы</h2>
+
+        <div id="works-state" class="section-placeholder">Загружаем работы...</div>
+        <div id="works-slider-root"></div>
+      </div>
+    </section>
+
+    <!-- Отзывы -->
+    <section class="section" id="reviews" style="background: var(--color-bg-alt);">
+      <div class="container">
+        <h2 class="section-title">📝 Отзывы клиентов</h2>
+
+        <div id="reviews-state" class="section-placeholder">Загружаем отзывы...</div>
+        <div id="reviews-grid" class="reviews-grid" hidden></div>
+        
+        <!-- Форма добавления отзыва -->
+        <div class="review-form-container" style="max-width: 600px; margin: 0 auto; background: white; padding: 2rem; border-radius: 1rem; box-shadow: var(--shadow-lg);">
+          <h3 style="font-size: 1.5rem; margin-bottom: 1.5rem; text-align: center;">Оставить отзыв</h3>
+          
+          <form id="review-form" style="display: flex; flex-direction: column; gap: 1rem;">
+            <div>
+              <label for="review-name" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--color-text);">Ваше имя *</label>
+              <input 
+                type="text" 
+                id="review-name" 
+                name="name" 
+                required
+                placeholder="Иван Иванов"
+                style="width: 100%; padding: 0.75rem 1rem; border: 2px solid #E2E8F0; border-radius: 0.5rem; font-size: 1rem; transition: border-color 0.3s;"
+              />
+            </div>
+            
+            <div>
+              <label for="review-type" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--color-text);">Тип жалюзи *</label>
+              <select 
+                id="review-type" 
+                name="blindsType" 
+                required
+                style="width: 100%; padding: 0.75rem 1rem; border: 2px solid #E2E8F0; border-radius: 0.5rem; font-size: 1rem; transition: border-color 0.3s;"
+              >
+                <option value="">Выберите тип</option>
+                <option value="Рулонные">Рулонные</option>
+                <option value="Вертикальные">Вертикальные</option>
+                <option value="Горизонтальные">Горизонтальные</option>
+                <option value="Другое">Другое</option>
+              </select>
+            </div>
+            
+            <div>
+              <label for="review-rating" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--color-text);">Оценка *</label>
+              <select 
+                id="review-rating" 
+                name="rating" 
+                required
+                style="width: 100%; padding: 0.75rem 1rem; border: 2px solid #E2E8F0; border-radius: 0.5rem; font-size: 1rem; transition: border-color 0.3s;"
+              >
+                <option value="5">⭐⭐⭐⭐⭐ (5) - Отлично</option>
+                <option value="4">⭐⭐⭐⭐ (4) - Хорошо</option>
+                <option value="3">⭐⭐⭐ (3) - Нормально</option>
+                <option value="2">⭐⭐ (2) - Плохо</option>
+                <option value="1">⭐ (1) - Ужасно</option>
+              </select>
+            </div>
+            
+            <div>
+              <label for="review-comment" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--color-text);">Ваш отзыв *</label>
+              <textarea 
+                id="review-comment" 
+                name="comment" 
+                required
+                rows="4"
+                placeholder="Расскажите о вашем опыте..."
+                style="width: 100%; padding: 0.75rem 1rem; border: 2px solid #E2E8F0; border-radius: 0.5rem; font-size: 1rem; transition: border-color 0.3s; resize: vertical;"
+              ></textarea>
+            </div>
+            
+            <!-- Загрузка фото -->
+            <div>
+              <label for="review-photos" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--color-text);">📸 Фото (до 3 шт, макс. 5 МБ каждое)</label>
+              <input 
+                type="file" 
+                id="review-photos" 
+                name="photos" 
+                multiple
+                accept="image/jpeg,image/png,image/webp"
+                style="width: 100%; padding: 0.75rem 1rem; border: 2px dashed #CBD5E0; border-radius: 0.5rem; font-size: 0.9rem; cursor: pointer; background: #F7FAFC;"
+              />
+              <div id="review-photos-preview" class="review-photos-preview"></div>
+            </div>
+            
+            <button 
+              type="submit" 
+              style="background: var(--color-primary); color: white; border: none; padding: 1rem 2rem; border-radius: 0.5rem; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 6px rgba(37,99,235,0.3);"
+            >
+              Отправить отзыв
+            </button>
+            <p id="review-form-status" class="form-status" aria-live="polite"></p>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center;">
+      <div class="container">
+        <h2 style="font-size: 2rem; margin-bottom: 1rem;">Хотите так же?</h2>
+        <p style="font-size: 1.2rem; margin-bottom: 2rem; opacity: 0.9;">Закажите жалюзи прямо сейчас и получите скидку 10%!</p>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+          <a href="/catalog" class="btn btn-primary" style="background: white; color: #667eea;">Смотреть каталог</a>
+          <button data-open-order-modal class="btn" style="background: transparent; border: 2px solid white; color: white;">Заказать замер</button>
+        </div>
+      </div>
+    </section>
+  </main>
+  
+  <Footer />
+</BaseLayout>
+
+<style>
+  /* Адаптивы */
+  @media (max-width: 768px) {
+    .section-title { font-size: 1.75rem !important; }
+    .works-slider img { height: 250px !important; }
+    .slider-prev, .slider-next { width: 40px !important; height: 40px !important; font-size: 1.25rem !important; }
+    .reviews-grid { grid-template-columns: 1fr !important; }
+    .review-form-container { padding: 1.5rem !important; }
+    h1 { font-size: 1.75rem !important; }
+  }
+
+  @media (max-width: 480px) {
+    .works-slider img { height: 200px !important; }
+    .btn { width: 100% !important; }
+  }
+
+  /* Hover эффекты */
+  .review-card { transition: transform 0.3s, box-shadow 0.3s; }
+  .review-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+  .slider-dot:hover { background: rgba(255,255,255,0.5); }
+  button:hover { opacity: 0.9; }
+
+  /* Превью фото в форме */
+  .review-photos-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    min-height: 0;
+  }
+  
+  .review-photo-preview-item {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 2px solid #E2E8F0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .review-photo-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .review-photo-preview-item .remove-photo-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 24px;
+    height: 24px;
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    transition: background 0.2s;
+  }
+  
+  .review-photo-preview-item .remove-photo-btn:hover {
+    background: rgba(220, 38, 38, 1);
+  }
+
+  /* Плавная прокрутка */
+  html { scroll-behavior: smooth; }
+</style>

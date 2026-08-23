@@ -1,0 +1,37 @@
+---
+import config from '../data/config.json';
+import '../styles/global.css';
+import '../styles/components.css';
+
+const {
+  title = config.seo.title,
+  description = config.seo.description,
+  canonical = '/'
+} = Astro.props;
+
+const API_URL = import.meta.env.PUBLIC_API_URL ?? '';
+const SITE_URL = import.meta.env.SITE_URL || Astro.site?.toString() || 'https://piter-jaluzi.ru';
+const canonicalUrl = new URL(canonical, SITE_URL).toString();
+---
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#2563EB" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={config.company.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <title>{title}</title>
+  </head>
+  <body data-api-url={API_URL}>
+    <slot />
+    <script type="module" src="/scripts/main.js" is:inline></script>
+  </body>
+</html>

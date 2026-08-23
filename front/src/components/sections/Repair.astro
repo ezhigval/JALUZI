@@ -1,0 +1,22 @@
+---
+const services = [
+  { title: 'Замена ламелей', price: 'от 150 ₽', desc: 'Любые размеры и цвета' },
+  { title: 'Ремонт механизма', price: 'от 500 ₽', desc: 'Замена комплектующих' },
+  { title: 'Регулировка', price: 'от 300 ₽', desc: 'Настройка системы' },
+];
+---
+<section id="repair" style="padding:4rem 2rem;background:#F8FAFC;">
+  <div style="max-width:1200px;margin:0 auto;">
+    <h2 style="text-align:center;font-size:2.5rem;margin-bottom:1rem;color:#0F172A;">Ремонт жалюзи</h2>
+    <p style="text-align:center;color:#64748B;margin-bottom:3rem;">Быстрый ремонт любых видов жалюзи</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:2rem;">
+      {services.map(service => (
+        <div style="background:white;padding:2rem;border-radius:0.5rem;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+          <h3 style="font-size:1.25rem;font-weight:600;margin-bottom:0.5rem;color:#0F172A;">{service.title}</h3>
+          <p style="color:#2563EB;font-weight:bold;margin-bottom:0.5rem;">{service.price}</p>
+          <p style="color:#64748B;">{service.desc}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

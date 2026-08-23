@@ -1,0 +1,27 @@
+---
+import config from '../../data/config.json';
+---
+<section style="min-height:clamp(500px, 70vh, 800px);display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg, rgba(102,126,234,0.85) 0%, rgba(118,75,162,0.85) 100%), url('/background.jpg') center center/cover no-repeat fixed;padding:4rem 1.5rem;position:relative;">
+  <div style="text-align:center;color:white;padding:1.5rem;max-width:700px;position:relative;z-index:1;">
+    <h1 style="font-size:clamp(1.75rem, 5vw, 2.5rem);margin-bottom:1rem;line-height:1.2;font-weight:700;">Жалюзи на заказ за 3 дня</h1>
+    <p style="font-size:clamp(1rem, 3vw, 1.25rem);margin-bottom:2rem;opacity:0.95;">Бесплатный замер и гарантия {config.company.warranty}</p>
+    <button data-open-order-modal style="display:inline-block;padding:1rem 2rem;background:white;color:#667eea;border:none;border-radius:0.5rem;font-weight:600;font-size:1.1rem;box-shadow:0 4px 15px rgba(0,0,0,0.3);transition:transform 0.3s;cursor:pointer;">Вызвать замерщика</button>
+  </div>
+</section>
+
+<style>
+  @media (max-width: 768px) {
+    section {
+      min-height: 500px;
+      padding: 3rem 1rem;
+      background-position: center 30%;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    section {
+      min-height: 450px;
+      background-position: center 40%;
+    }
+  }
+</style>

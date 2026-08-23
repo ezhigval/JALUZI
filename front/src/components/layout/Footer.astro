@@ -1,0 +1,45 @@
+---
+import config from '../../data/config.json';
+---
+<footer style="background:var(--color-dark);color:white;padding:3rem 0;">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:2rem;margin-bottom:2rem;">
+      <div>
+        <h3 style="font-size:1.25rem;margin-bottom:1rem;">🪟 {config.company.name}</h3>
+        <p style="color:#94A3B8;line-height:1.7;">Качественные жалюзи для вашего дома и офиса с {config.company.since} года.</p>
+      </div>
+      
+      <div>
+        <h4 style="font-size:1rem;margin-bottom:1rem;">Навигация</h4>
+        <div style="display:flex;flex-direction:column;gap:0.5rem;">
+          <a href="/" style="color:#94A3B8;text-decoration:none;">Главная</a>
+          <a href="/catalog" style="color:#94A3B8;text-decoration:none;">Каталог</a>
+          <a href="/works-reviews" style="color:#94A3B8;text-decoration:none;">Работы и отзывы</a>
+          <a href="/#contacts" style="color:#94A3B8;text-decoration:none;">Контакты</a>
+        </div>
+      </div>
+      
+      <div>
+        <h4 style="font-size:1rem;margin-bottom:1rem;">Контакты</h4>
+        <div style="display:flex;flex-direction:column;gap:0.5rem;color:#94A3B8;">
+          <span>📍 {config.company.address}</span>
+          <a href={`tel:${config.company.phone}`} style="color:var(--color-primary);text-decoration:none;">📞 {config.company.phone}</a>
+          <a href={`mailto:${config.company.email}`} style="color:#94A3B8;text-decoration:none;">✉️ {config.company.email}</a>
+        </div>
+      </div>
+      
+      <div>
+        <h4 style="font-size:1rem;margin-bottom:1rem;">Режим работы</h4>
+        <div style="color:#94A3B8;line-height:1.7;">
+          <div>Пн-Пт: 9:00 - 19:00</div>
+          <div>Сб: 10:00 - 17:00</div>
+          <div>Вс: Выходной</div>
+        </div>
+      </div>
+    </div>
+    
+    <div style="border-top:1px solid #334155;padding-top:1.5rem;text-align:center;color:#64748B;font-size:0.9rem;">
+      <p>&copy; {new Date().getFullYear()} {config.company.name}. Все права защищены.</p>
+    </div>
+  </div>
+</footer>

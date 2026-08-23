@@ -1,0 +1,33 @@
+{
+  "name": "piter-jaluzi-back",
+  "version": "1.0.0",
+  "description": "Backend for Piter-Jaluzi",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "check": "node --check src/index.js && node --check test-backend.js && node --check test-api.js && node --check test-order.js && node --check test-front-contract.js && node --check test-telegram-bot.js",
+    "normalize:data": "node src/scripts/normalize-db.js",
+    "test:smoke": "node test-backend.js",
+    "test:contract": "node test-front-contract.js",
+    "test:telegram": "node test-telegram-bot.js",
+    "postinstall": "npm rebuild better-sqlite3 2>/dev/null || true"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.8.0",
+    "cheerio": "^1.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^8.3.2",
+    "helmet": "^8.1.0",
+    "imapflow": "^1.2.18",
+    "mailparser": "^3.9.6",
+    "nodemailer": "^8.0.4",
+    "playwright": "^1.59.1",
+    "telegraf": "^4.16.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
