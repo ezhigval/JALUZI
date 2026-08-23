@@ -53,7 +53,12 @@ npm run dev
 
 ## 3. Cloudflare Worker для Telegram
 
-С машины с Node и аккаунтом Cloudflare:
+С Yandex Cloud VM в РФ `api.telegram.org` **не открывается** (timeout).
+Cloudflare WARP на этой VM тоже не зарегистрировался (`Failed to communicate with the WARP API`).
+
+Нужен **постоянный** Cloudflare Worker. Temporary preview (`wrangler deploy --temporary`) с IP датацентра ловит challenge 403 — для прода не подходит.
+
+На Mac:
 
 ```bash
 npm i -g wrangler
@@ -63,13 +68,21 @@ npx wrangler deploy deploy/cloudflare/telegram-proxy-worker.js \
   --compatibility-date 2026-08-23
 ```
 
-В `.env` на VM:
+В `/opt/piter-jaluzi/.env` на VM:
 
 ```env
-TELEGRAM_API_ROOT=https://piter-jaluzi-tg-proxy.<subdomain>.workers.dev
+TELEGRAM_API_ROOT=https://piter-jaluzi-tg-proxy.<ваш-subdomain>.workers.dev
 ```
 
-Без этого worker на Yandex Cloud в РФ часто не достучится до `api.telegram.org`.
+Перезапуск:
+
+```bash
+cd /opt/piter-jaluzi
+docker compose up -d --force-recreate api worker
+docker compose logs -f worker
+```
+
+Ожидаемая строка: `Telegram bot initialized via https://...workers.dev`.
 
 ## 4. Первый запуск на Ubuntu
 
