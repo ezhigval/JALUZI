@@ -44,15 +44,22 @@ const publicApiBaseUrl =
   normalizeUrl(process.env.PUBLIC_API_BASE_URL) ||
   normalizeUrl(process.env.RENDER_EXTERNAL_URL) ||
   apiUrl;
+const siteUrl = normalizeUrl(process.env.SITE_URL) || publicApiBaseUrl;
 const processRole = String(process.env.PROCESS_ROLE || 'all').trim().toLowerCase();
 const telegramApiRoot =
   normalizeUrl(process.env.TELEGRAM_API_ROOT) || 'https://api.telegram.org';
+const telegramMode = String(process.env.TELEGRAM_MODE || 'polling')
+  .trim()
+  .toLowerCase() === 'webhook'
+  ? 'webhook'
+  : 'polling';
 
 module.exports = {
   port,
   processRole,
   apiUrl,
   publicApiBaseUrl,
+  siteUrl,
   corsOrigins: parseOrigins(process.env.CORS_ORIGIN),
   storageRoot,
   dataDir,
@@ -62,12 +69,22 @@ module.exports = {
   telegramBotToken: process.env.TELEGRAM_BOT_TOKEN || '',
   telegramBotPassword: process.env.TELEGRAM_BOT_PASSWORD || '',
   telegramApiRoot,
+  telegramMode,
+  telegramWebhookPath: process.env.TELEGRAM_WEBHOOK_PATH || '/telegram/webhook',
+  telegramWebhookSecret: process.env.TELEGRAM_WEBHOOK_SECRET || '',
   email: {
     host: process.env.EMAIL_HOST || '',
     port: Number(process.env.EMAIL_PORT) || 587,
     user: process.env.EMAIL_USER || '',
-    pass: process.env.EMAIL_PASS || ''
+    pass: process.env.EMAIL_PASS || '',
+    secure:
+      process.env.EMAIL_SECURE === undefined || process.env.EMAIL_SECURE === ''
+        ? undefined
+        : ['1', 'true', 'yes', 'on'].includes(
+            String(process.env.EMAIL_SECURE).trim().toLowerCase()
+          )
   },
+  deployHookSecret: process.env.DEPLOY_HOOK_SECRET || '',
   incomingEmail: {
     user: process.env.INCOMING_EMAIL_USER || '',
     pass: process.env.INCOMING_EMAIL_PASS || '',

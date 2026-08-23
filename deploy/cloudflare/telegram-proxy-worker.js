@@ -1,7 +1,10 @@
 /**
  * Cloudflare Worker: Telegram Bot API reverse proxy.
  *
- * Deploy:
+ * Yandex Cloud VMs in RU often cannot reach api.telegram.org directly.
+ * This worker forwards Bot API calls from the VM.
+ *
+ * Deploy from the monorepo root:
  *   npx wrangler deploy deploy/cloudflare/telegram-proxy-worker.js \
  *     --name piter-jaluzi-tg-proxy \
  *     --compatibility-date 2026-08-23

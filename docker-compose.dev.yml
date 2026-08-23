@@ -1,0 +1,80 @@
+# Local HTTP stack for the monorepo. Not for the Yandex Cloud VM.
+#
+#   docker compose -f docker-compose.dev.yml up --build
+#
+# Site + API (same origin): http://localhost:8080
+# Direct API:               http://localhost:3001
+# Mailpit UI:               http://localhost:8025
+
+name: piter-jaluzi-dev
+
+services:
+  mailpit:
+    image: ghcr.io/axllent/mailpit:v1.21
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "1"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "1"
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: deploy/api.Dockerfile
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: development
+      PORT: "3001"
+      PROCESS_ROLE: all
+      STORAGE_DIR: /var/data/jaluzi
+      CORS_ORIGIN: http://localhost:8080,http://127.0.0.1:8080,http://localhost:4321
+      PUBLIC_API_BASE_URL: http://localhost:8080
+      API_URL: http://localhost:8080
+      EMAIL_HOST: mailpit
+      EMAIL_PORT: "1025"
+      EMAIL_USER: orders@piter-jaluzi.local
+      EMAIL_PASS: ""
+      EMAIL_SECURE: "false"
+      INCOMING_EMAIL_HOST: ""
+      INCOMING_EMAIL_PASS: ""
+    volumes:
+      - jaluzi-data:/var/data/jaluzi
+    ports:
+      - "3001:3001"
+    depends_on:
+      - mailpit
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3001/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 25s
+
+  web:
+    build:
+      context: .
+      dockerfile: deploy/web.Dockerfile
+      args:
+        PUBLIC_API_URL: ""
+        SITE_URL: http://localhost:8080
+    ports:
+      - "8080:80"
+    volumes:
+      - ./deploy/Caddyfile.local:/etc/caddy/Caddyfile:ro
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  jaluzi-data:

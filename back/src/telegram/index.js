@@ -255,7 +255,7 @@ function setupHandlers(telegrafApp, botApi) {
 function initBot({ mode = 'full' } = {}) {
   if (!config.telegramBotToken) {
     console.error('❌ TELEGRAM_BOT_TOKEN not set');
-    return null;
+    return Promise.resolve(null);
   }
 
   try {
@@ -268,33 +268,74 @@ function initBot({ mode = 'full' } = {}) {
     bot = createBotApi(app);
 
     app.catch((error) => {
-      console.log('⚠️  TG polling:', error.code || error.name, error.message);
+      console.log('⚠️  TG update:', error.code || error.name, error.message);
     });
 
     if (mode === 'send-only') {
       console.log('🤖 Telegram send-only client ready via ' + config.telegramApiRoot);
-      return bot;
+      return Promise.resolve(bot);
     }
 
     setupHandlers(app, bot);
 
-    app.launch({
-      dropPendingUpdates: false,
-      allowedUpdates: ['message', 'callback_query']
-    }).then(() => {
-      console.log('🤖 Telegram bot initialized via ' + config.telegramApiRoot);
-    }).catch((error) => {
-      console.error('❌ Telegram bot init failed:', error.message);
-      bot = null;
-      app = null;
-    });
+    if (config.telegramMode === 'webhook') {
+      const webhookPath = config.telegramWebhookPath || '/telegram/webhook';
+      let hostname = '';
+      try {
+        hostname = new URL(config.siteUrl).hostname;
+      } catch {
+        hostname = String(config.siteUrl || '')
+          .replace(/^https?:\/\//, '')
+          .split('/')[0];
+      }
 
-    return bot;
+      if (!hostname) {
+        console.error('❌ SITE_URL required for TELEGRAM_MODE=webhook');
+        return Promise.resolve(null);
+      }
+
+      return app
+        .createWebhook({
+          domain: hostname,
+          path: webhookPath,
+          secretToken: config.telegramWebhookSecret || undefined
+        })
+        .then((middleware) => {
+          console.log(
+            `🤖 Telegram webhook → https://${hostname}${webhookPath} via ${config.telegramApiRoot}`
+          );
+          bot.webhookMiddleware = middleware;
+          bot.webhookPath = webhookPath;
+          return bot;
+        })
+        .catch((error) => {
+          console.error('❌ Telegram webhook init failed:', error.message);
+          bot = null;
+          app = null;
+          return null;
+        });
+    }
+
+    return app
+      .launch({
+        dropPendingUpdates: false,
+        allowedUpdates: ['message', 'callback_query']
+      })
+      .then(() => {
+        console.log('🤖 Telegram bot polling via ' + config.telegramApiRoot);
+        return bot;
+      })
+      .catch((error) => {
+        console.error('❌ Telegram bot init failed:', error.message);
+        bot = null;
+        app = null;
+        return null;
+      });
   } catch (error) {
     console.error('❌ Telegram bot init failed:', error.message);
     bot = null;
     app = null;
-    return null;
+    return Promise.resolve(null);
   }
 }
 

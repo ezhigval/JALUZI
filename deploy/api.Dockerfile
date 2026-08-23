@@ -1,4 +1,5 @@
-FROM node:22-bookworm-slim
+# mirror.gcr.io is reachable from Yandex Cloud RU; Docker Hub often times out.
+FROM mirror.gcr.io/library/node:22-bookworm-slim
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends python3 make g++ \
@@ -13,7 +14,8 @@ RUN npm ci --omit=dev
 COPY back/src ./src
 COPY back/data/db.seed.json ./data/db.seed.json
 COPY deploy/api-entrypoint.sh /api-entrypoint.sh
-RUN chmod +x /api-entrypoint.sh
+RUN chmod +x /api-entrypoint.sh \
+  && test -d ./src/uploads/products
 
 ENV NODE_ENV=production
 EXPOSE 3001

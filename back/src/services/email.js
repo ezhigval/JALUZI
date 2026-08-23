@@ -4,7 +4,7 @@ const config = require('../config');
 let transporter = null;
 
 function isEmailConfigured() {
-  return Boolean(config.email.host && config.email.user && config.email.pass);
+  return Boolean(config.email.host);
 }
 
 function getTransporter() {
@@ -13,17 +13,28 @@ function getTransporter() {
   }
 
   if (!transporter) {
-    transporter = nodemailer.createTransport({
+    const port = config.email.port;
+    const secure =
+      typeof config.email.secure === 'boolean'
+        ? config.email.secure
+        : port === 465;
+
+    const transport = {
       disableFileAccess: true,
       disableUrlAccess: true,
       host: config.email.host,
-      port: config.email.port,
-      secure: config.email.port === 465,
-      auth: {
-        user: config.email.user,
-        pass: config.email.pass
-      }
-    });
+      port,
+      secure
+    };
+
+    if (config.email.user || config.email.pass) {
+      transport.auth = {
+        user: config.email.user || 'mailpit',
+        pass: config.email.pass || 'mailpit'
+      };
+    }
+
+    transporter = nodemailer.createTransport(transport);
   }
 
   return transporter;
@@ -31,6 +42,7 @@ function getTransporter() {
 
 async function sendOrderEmail(order) {
   const blindsType = order.blindsType || order.blinds_type || '—';
+  const fromAddress = config.email.user || 'orders@piter-jaluzi.local';
 
   if (!isEmailConfigured()) {
     return { success: false, skipped: true, error: 'Email transport is not configured' };
@@ -39,10 +51,10 @@ async function sendOrderEmail(order) {
   try {
     const activeTransporter = getTransporter();
     await activeTransporter.sendMail({
-      from: `"Питер-Жалюзи" <${config.email.user}>`,
-      to: config.email.user,
+      from: `"Питер-Жалюзи" <${fromAddress}>`,
+      to: fromAddress,
       subject: `🔔 Заявка: ${order.name}`,
-      html: `<b>Новая заявка</b><br>👤 ${order.name}<br>📱 ${order.phone}<br>🪟 ${blindsType}<br>💬 ${order.message||'—'}`,
+      html: `<b>Новая заявка</b><br>👤 ${order.name}<br>📱 ${order.phone}<br>🪟 ${blindsType}<br>💬 ${order.message || '—'}`,
     });
     return { success: true };
   } catch (e) {

@@ -1,4 +1,20 @@
+name: piter-jaluzi
+
 services:
+  mailpit:
+    image: ghcr.io/axllent/mailpit:v1.21
+    restart: unless-stopped
+    networks:
+      - backend
+    # UI only on loopback — open via SSH tunnel: ssh -L 8025:127.0.0.1:8025 jaluzi-vm
+    ports:
+      - "127.0.0.1:8025:8025"
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "1"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "1"
+      MP_MAX_MESSAGES: "500"
+    # SMTP stays internal (mailpit:1025). No public publish.
+
   api:
     build:
       context: .
@@ -10,6 +26,9 @@ services:
       PORT: "3001"
       PROCESS_ROLE: api
       STORAGE_DIR: /var/data/jaluzi
+      EMAIL_HOST: ${EMAIL_HOST:-mailpit}
+      EMAIL_PORT: ${EMAIL_PORT:-1025}
+      EMAIL_SECURE: ${EMAIL_SECURE:-false}
     volumes:
       - jaluzi-data:/var/data/jaluzi
     restart: unless-stopped
@@ -18,6 +37,8 @@ services:
       - backend
     expose:
       - "3001"
+    depends_on:
+      - mailpit
     healthcheck:
       test:
         [
@@ -29,7 +50,7 @@ services:
       interval: 30s
       timeout: 5s
       retries: 5
-      start_period: 20s
+      start_period: 25s
 
   worker:
     build:
@@ -41,12 +62,19 @@ services:
       NODE_ENV: production
       PROCESS_ROLE: worker
       STORAGE_DIR: /var/data/jaluzi
+      EMAIL_HOST: ${EMAIL_HOST:-mailpit}
+      EMAIL_PORT: ${EMAIL_PORT:-1025}
+      EMAIL_SECURE: ${EMAIL_SECURE:-false}
     volumes:
       - jaluzi-data:/var/data/jaluzi
     restart: unless-stopped
     networks:
       - backend
-    # No published ports. Telegram + IMAP only.
+    depends_on:
+      api:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
 
   web:
     build:

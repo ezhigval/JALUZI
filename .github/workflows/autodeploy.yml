@@ -1,0 +1,20 @@
+name: Autodeploy ping
+
+# GitHub cannot SSH into the Yandex VM (inbound filtered).
+# The VM pulls this repo every 2 minutes via systemd (deploy/install-autodeploy.sh).
+# Optionally call the HTTPS hook after push when DNS/HTTPS is up:
+#   curl -X POST -H "Authorization: Bearer $DEPLOY_HOOK_SECRET" https://piter-jaluzi.ru/internal/deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  note:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Reminder
+        run: |
+          echo "VM autodeploy timer will pick up this commit within ~2 minutes."
+          echo "No inbound SSH required. Optional hook: POST /internal/deploy"
