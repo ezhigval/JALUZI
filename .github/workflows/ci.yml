@@ -1,0 +1,45 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: |
+            front/package-lock.json
+            back/package-lock.json
+
+      - name: Install frontend
+        working-directory: front
+        run: npm ci
+
+      - name: Install backend
+        working-directory: back
+        run: npm ci
+
+      - name: Check backend syntax
+        working-directory: back
+        run: npm run check
+
+      - name: Check and build frontend
+        working-directory: front
+        env:
+          PUBLIC_API_URL: ""
+          SITE_URL: https://piter-jaluzi.ru
+        run: npm run build
+
+      - name: Validate Compose files
+        run: |
+          cp .env.example .env
+          docker compose -f docker-compose.yml config --quiet
+          docker compose -f docker-compose.dev.yml config --quiet
