@@ -1,0 +1,21 @@
+{
+  "name": "Питер-Жалюзи - Жалюзи на заказ в Санкт-Петербурге",
+  "short_name": "Питер-Жалюзи",
+  "description": "Качественные жалюзи для дома и офиса. Рулонные, вертикальные, горизонтальные.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["business", "shopping"],
+  "lang": "ru",
+  "dir": "ltr"
+}

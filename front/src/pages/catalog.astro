@@ -1,0 +1,37 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import OrderModal from '../components/ui/OrderModal.astro';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import config from '../data/config.json';
+---
+<BaseLayout
+    title={`Каталог жалюзи | ${config.company.name}`}
+    description="Широкий выбор жалюзи."
+    canonical="/catalog"
+>
+  <OrderModal />
+  <Header />
+  <section class="section">
+    <div class="container">
+      <h1 class="section-title">Каталог жалюзи</h1>
+
+      <div id="category-filters" style="display:flex;gap:0.75rem;margin-bottom:2rem;flex-wrap:wrap;justify-content:center;">
+        <button data-category="Все" class="btn" style="border:2px solid #CBD5E1;border-radius:2rem;background:#2563EB;color:white;font-weight:500;font-size:0.9rem;">Все</button>
+        <button data-category="Рулонные" class="btn" style="border:2px solid #CBD5E1;border-radius:2rem;background:white;color:#0F172A;font-weight:500;font-size:0.9rem;">Рулонные</button>
+        <button data-category="Вертикальные" class="btn" style="border:2px solid #CBD5E1;border-radius:2rem;background:white;color:#0F172A;font-weight:500;font-size:0.9rem;">Вертикальные</button>
+        <button data-category="Горизонтальные" class="btn" style="border:2px solid #CBD5E1;border-radius:2rem;background:white;color:#0F172A;font-weight:500;font-size:0.9rem;">Горизонтальные</button>
+        <button data-category="Пластиковые" class="btn" style="border:2px solid #CBD5E1;border-radius:2rem;background:white;color:#0F172A;font-weight:500;font-size:0.9rem;">Пластиковые</button>
+        <button data-category="Зебра" class="btn" style="border:2px solid #CBD5E1;border-radius:2rem;background:white;color:#0F172A;font-weight:500;font-size:0.9rem;">Зебра</button>
+      </div>
+
+      <div id="products-grid" class="product-grid">
+        <div class="section-placeholder">Загружаем товары...</div>
+      </div>
+
+      <!-- Пагинация -->
+      <div id="pagination" style="display:flex;gap:0.5rem;justify-content:center;margin-top:2rem;flex-wrap:wrap;"></div>
+    </div>
+  </section>
+  <Footer />
+</BaseLayout>

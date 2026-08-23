@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import OrderModal from '../components/ui/OrderModal.astro';
+import Header from '../components/layout/Header.astro';
+import Hero from '../components/sections/Hero.astro';
+import Features from '../components/sections/Features.astro';
+import CatalogPreview from '../components/sections/CatalogPreview.astro';
+import Repair from '../components/sections/Repair.astro';
+import About from '../components/sections/About.astro';
+import ContactForm from '../components/sections/ContactForm.astro';
+import Footer from '../components/layout/Footer.astro';
+---
+<BaseLayout 
+  title="Жалюзи на заказ | Производство и установка" 
+  description="Изготовление жалюзи любых видов за 3 дня. Бесплатный замер. Гарантия 1 год."
+  canonical="/"
+>
+  <OrderModal />
+  <Header />
+  <Hero />
+  <Features />
+  <CatalogPreview />
+  <Repair />
+  <About />
+  <ContactForm />
+  <Footer />
+</BaseLayout>

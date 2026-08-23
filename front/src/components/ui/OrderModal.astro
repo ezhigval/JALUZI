@@ -1,0 +1,30 @@
+---
+import config from '../../data/config.json';
+---
+<div id="order-modal" class="modal-overlay">
+  <div class="modal-content">
+    <button id="order-modal-close" class="modal-close-btn">×</button>
+    <div class="modal-header">
+      <h2>Заказать жалюзи</h2>
+      <p>Оставьте заявку и мы перезвоним</p>
+    </div>
+    <form id="order-form" class="modal-body">
+      <input type="text" name="name" placeholder="Ваше имя" required class="modal-input" />
+      <input type="tel" name="phone" placeholder="Телефон" required class="modal-input" />
+      <select name="blindsType" required class="modal-input modal-select">
+        <option value="" disabled selected>Тип жалюзи</option>
+        <option value="Рулонные">Рулонные</option>
+        <option value="Вертикальные">Вертикальные</option>
+        <option value="Горизонтальные">Горизонтальные</option>
+        <option value="Другое">Другое</option>
+      </select>
+      <textarea name="message" rows="3" placeholder="Комментарий" class="modal-textarea"></textarea>
+      <button type="submit" class="btn btn-primary">Отправить заявку</button>
+      <p id="order-form-status" class="form-status" aria-live="polite"></p>
+    </form>
+    <div class="modal-footer">
+      <p>📞 {config.company.phone}</p>
+      <p>📍 {config.company.address}</p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,43 @@
+---
+import config from '../../data/config.json';
+
+const navItems = [
+  { href: '/', label: 'Главная' },
+  { href: '/catalog', label: 'Каталог' },
+  { href: '/works-reviews', label: 'Работы и отзывы' },
+  { href: '/#contacts', label: 'Контакты' }
+];
+---
+<header class="header">
+  <div class="container header-inner">
+    <a href="/" class="header-logo">🪟 {config.company.name}</a>
+    
+    <nav class="desktop-nav" aria-label="Основная навигация">
+      {navItems.map(item => (
+        <a href={item.href} class="header-link">{item.label}</a>
+      ))}
+    </nav>
+    
+    <div class="header-actions">
+      <a href={`tel:${config.company.phone}`} class="header-phone desktop-only">{config.company.phone}</a>
+      <button data-open-order-modal class="btn btn-primary header-btn" type="button">Заказать</button>
+      <button
+        class="mobile-menu-btn"
+        id="mobile-menu-btn"
+        type="button"
+        aria-label="Меню"
+        aria-controls="mobile-nav"
+        aria-expanded="false"
+      >
+        ☰
+      </button>
+    </div>
+  </div>
+  
+  <nav class="mobile-nav" id="mobile-nav" aria-label="Мобильная навигация" hidden>
+    {navItems.map(item => (
+      <a href={item.href} class="mobile-nav-link">{item.label}</a>
+    ))}
+    <a href={`tel:${config.company.phone}`} class="mobile-nav-link header-phone">📞 {config.company.phone}</a>
+  </nav>
+</header>
