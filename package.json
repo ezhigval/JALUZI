@@ -1,0 +1,19 @@
+{
+  "name": "piter-jaluzi",
+  "private": true,
+  "description": "Piter-Jaluzi monorepo: Astro storefront, Express API, Telegram admin, Docker Compose for Yandex Cloud",
+  "scripts": {
+    "dev": "npm run dev:back & npm run dev:front; wait",
+    "dev:front": "npm --prefix front run dev",
+    "dev:back": "npm --prefix back run dev",
+    "install:all": "npm --prefix front ci && npm --prefix back ci",
+    "check": "npm --prefix front run check && npm --prefix back run check",
+    "build": "npm --prefix front run build",
+    "test": "npm --prefix back run check && npm --prefix back run test:smoke",
+    "test:contract": "npm --prefix back run test:contract",
+    "compose:up": "docker compose --env-file .env up -d --build",
+    "compose:dev": "docker compose -f docker-compose.dev.yml up --build",
+    "compose:ps": "docker compose ps",
+    "deploy": "./deploy/deploy.sh"
+  }
+}

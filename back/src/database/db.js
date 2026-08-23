@@ -1,19 +1,60 @@
 const { getDb } = require('./initDb');
 
+function toPublicId(id) {
+  const n = Number(id);
+  return Number.isFinite(n) ? n : id;
+}
+
+function mapProduct(row) {
+  if (!row) return null;
+  return { ...row, id: toPublicId(row.id), in_stock: !!row.in_stock };
+}
+
+function mapReview(row) {
+  if (!row) return null;
+  return {
+    ...row,
+    id: toPublicId(row.id),
+    photos: typeof row.photos === 'string' ? JSON.parse(row.photos) : row.photos
+  };
+}
+
+function mapWork(row) {
+  if (!row) return null;
+  return { ...row, id: toPublicId(row.id) };
+}
+
+function lookupById(table, id) {
+  const allowed = new Set(['products', 'reviews', 'works', 'orders']);
+  if (!allowed.has(table)) {
+    throw new Error('Invalid table');
+  }
+  const db = getDb();
+  const numeric = toPublicId(id);
+  return db.prepare(`SELECT * FROM ${table} WHERE id = ? OR CAST(id AS TEXT) = ?`).get(numeric, String(numeric));
+}
+
+function deleteById(table, id) {
+  const row = lookupById(table, id);
+  if (!row) return false;
+  const db = getDb();
+  const result = db.prepare(`DELETE FROM ${table} WHERE id = ?`).run(row.id);
+  return result.changes > 0;
+}
+
 // === PRODUCTS ===
 module.exports.getAllProducts = () => {
   const db = getDb();
-  return db.prepare('SELECT * FROM products ORDER BY id').all();
+  return db.prepare('SELECT * FROM products ORDER BY CAST(id AS INTEGER), id').all().map(mapProduct);
 };
 
 module.exports.getProductById = (id) => {
-  const db = getDb();
-  return db.prepare('SELECT * FROM products WHERE id = ?').get(id);
+  return mapProduct(lookupById('products', id));
 };
 
 module.exports.createProduct = (data) => {
   const db = getDb();
-  const maxId = db.prepare('SELECT COALESCE(MAX(id), 0) as maxId FROM products').get();
+  const maxId = db.prepare('SELECT COALESCE(MAX(CAST(id AS INTEGER)), 0) as maxId FROM products').get();
   const newId = maxId.maxId + 1;
   const now = new Date().toISOString();
   const product = {
@@ -37,7 +78,7 @@ module.exports.createProduct = (data) => {
 
 module.exports.updateProduct = (id, data) => {
   const db = getDb();
-  const existing = db.prepare('SELECT * FROM products WHERE id = ?').get(id);
+  const existing = lookupById('products', id);
   if (!existing) return null;
 
   const updates = {};
@@ -51,20 +92,17 @@ module.exports.updateProduct = (id, data) => {
   updates.updated_at = new Date().toISOString();
 
   const keys = Object.keys(updates);
-  if (keys.length === 0) return { ...existing, in_stock: !!existing.in_stock };
+  if (keys.length === 0) return mapProduct(existing);
 
   const setClause = keys.map(k => `${k} = @${k}`).join(', ');
   const stmt = db.prepare(`UPDATE products SET ${setClause} WHERE id = @id`);
-  stmt.run({ ...updates, id });
+  stmt.run({ ...updates, id: existing.id });
 
-  const updated = db.prepare('SELECT * FROM products WHERE id = ?').get(id);
-  return { ...updated, in_stock: !!updated.in_stock };
+  return mapProduct(lookupById('products', existing.id));
 };
 
 module.exports.deleteProduct = (id) => {
-  const db = getDb();
-  const result = db.prepare('DELETE FROM products WHERE id = ?').run(id);
-  return result.changes > 0;
+  return deleteById('products', id);
 };
 
 // === ORDERS ===
@@ -96,16 +134,12 @@ module.exports.getAllOrders = () => {
 // === REVIEWS ===
 module.exports.getAllReviews = () => {
   const db = getDb();
-  const rows = db.prepare('SELECT * FROM reviews ORDER BY created_at DESC').all();
-  return rows.map(r => ({
-    ...r,
-    photos: typeof r.photos === 'string' ? JSON.parse(r.photos) : r.photos
-  }));
+  return db.prepare('SELECT * FROM reviews ORDER BY created_at DESC').all().map(mapReview);
 };
 
 module.exports.createReview = (data) => {
   const db = getDb();
-  const maxId = db.prepare('SELECT COALESCE(MAX(id), 0) as maxId FROM reviews').get();
+  const maxId = db.prepare('SELECT COALESCE(MAX(CAST(id AS INTEGER)), 0) as maxId FROM reviews').get();
   const newId = maxId.maxId + 1;
   const review = {
     id: newId,
@@ -127,20 +161,18 @@ module.exports.createReview = (data) => {
 };
 
 module.exports.deleteReview = (id) => {
-  const db = getDb();
-  const result = db.prepare('DELETE FROM reviews WHERE id = ?').run(id);
-  return result.changes > 0;
+  return deleteById('reviews', id);
 };
 
 // === WORKS ===
 module.exports.getAllWorks = () => {
   const db = getDb();
-  return db.prepare('SELECT * FROM works ORDER BY created_at DESC').all();
+  return db.prepare('SELECT * FROM works ORDER BY created_at DESC').all().map(mapWork);
 };
 
 module.exports.createWork = (data) => {
   const db = getDb();
-  const maxId = db.prepare('SELECT COALESCE(MAX(id), 0) as maxId FROM works').get();
+  const maxId = db.prepare('SELECT COALESCE(MAX(CAST(id AS INTEGER)), 0) as maxId FROM works').get();
   const newId = maxId.maxId + 1;
   const work = {
     id: newId,
@@ -156,9 +188,7 @@ module.exports.createWork = (data) => {
 };
 
 module.exports.deleteWork = (id) => {
-  const db = getDb();
-  const result = db.prepare('DELETE FROM works WHERE id = ?').run(id);
-  return result.changes > 0;
+  return deleteById('works', id);
 };
 
 // === LEGACY API: readDb / writeDb ===
@@ -166,13 +196,10 @@ module.exports.deleteWork = (id) => {
 module.exports.readDb = () => {
   const db = getDb();
   return {
-    products: db.prepare('SELECT * FROM products').all().map(p => ({ ...p, in_stock: !!p.in_stock })),
-    orders: db.prepare('SELECT * FROM orders').all(),
-    reviews: db.prepare('SELECT * FROM reviews').all().map(r => ({
-      ...r,
-      photos: typeof r.photos === 'string' ? JSON.parse(r.photos) : r.photos
-    })),
-    works: db.prepare('SELECT * FROM works').all()
+    products: db.prepare('SELECT * FROM products').all().map(mapProduct),
+    orders: db.prepare('SELECT * FROM orders').all().map((row) => ({ ...row, id: toPublicId(row.id) })),
+    reviews: db.prepare('SELECT * FROM reviews').all().map(mapReview),
+    works: db.prepare('SELECT * FROM works').all().map(mapWork)
   };
 };
 

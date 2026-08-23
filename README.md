@@ -1,28 +1,30 @@
 # Питер-Жалюзи
 
-Монорепозиторий сайта [piter-jaluzi.ru](https://piter-jaluzi.ru):
+Канонический монорепозиторий сайта [piter-jaluzi.ru](https://piter-jaluzi.ru):
 
 - `front/` — Astro-витрина
 - `back/` — Express API + Telegram admin bot + email listener
-- `deploy/` — Docker/Caddy и скрипты для Ubuntu VM в Yandex Cloud
+- `deploy/` — Docker, Caddy и скрипты для Ubuntu VM в Yandex Cloud
+
+Репозиторий: [github.com/ezhigval/JALUZI](https://github.com/ezhigval/JALUZI).
 
 ## Быстрый старт
 
-### Frontend
+Из корня:
 
 ```bash
-cd front
-npm install
+npm run install:all
 npm run dev
 ```
 
-Основные команды:
+Или раздельно:
 
-- `npm run check`
-- `npm run build`
-- `npm run preview`
+```bash
+cd back && cp .env.example .env && npm install && npm run dev
+cd front && cp .env.example .env.local && npm install && npm run dev
+```
 
-Локально:
+Локально фронт: `http://localhost:4321`, API: `http://localhost:3001`.
 
 ```env
 PUBLIC_API_URL=http://localhost:3001
@@ -31,40 +33,20 @@ SITE_URL=http://localhost:4321
 
 В проде `PUBLIC_API_URL` пустой: сайт и API на одном домене.
 
-### Backend
+Проверка стека в Docker без TLS:
 
 ```bash
-cd back
-npm install
-npm run dev
-```
-
-Основные команды:
-
-- `npm run check`
-- `npm run normalize:data`
-- `npm run test:smoke`
-- `npm run test:contract`
-
-Минимальные переменные:
-
-- `PORT=3001`
-- `CORS_ORIGIN=http://localhost:4321`
-
-Опциональные интеграции: Telegram и почта REG.RU. Шаблон — `back/.env.example`.
-
-По умолчанию тестовые скрипты не создают заявки и не загрязняют базу.
-Для write-smoke `POST /api/orders`:
-
-```bash
-ALLOW_WRITE_TESTS=1 node test-order.js
+cp .env.example .env
+docker compose -f docker-compose.dev.yml up --build
+# http://localhost:8080
 ```
 
 ## Архитектура
 
 Подробная карта — в [ARCHITECTURE.md](./ARCHITECTURE.md).
 
-Прод: одна Ubuntu VM, Caddy раздаёт статику и проксирует `/api` и `/uploads`.
+Прод: одна Ubuntu VM, Caddy раздаёт статику и проксирует публичный `/api`, `/uploads`, `/health`.
+Telegram и IMAP живут в контейнере `worker` без открытых портов.
 Домен остаётся на REG.RU, DNS A-записи выставляются вручную.
 
 ## Deploy

@@ -49,7 +49,7 @@ router.get('/', (req, res) => {
 // GET /api/products/:id - один товар
 router.get('/:id', (req, res) => {
   try {
-    const p = products.getById(parseInt(req.params.id));
+    const p = products.getById(req.params.id);
     if (!p) return res.status(404).json({ success: false, error: 'Not found' });
     res.json({ success: true, data: serializeProduct(req, p) });
   } catch(e) { 
@@ -82,7 +82,7 @@ router.put('/:id', (req, res) => {
       return res.status(400).json({ success: false, error: 'Invalid price' });
     }
 
-    const p = products.update(parseInt(req.params.id), payload);
+    const p = products.update(req.params.id, payload);
     if (!p) return res.status(404).json({ success: false, error: 'Not found' });
     res.json({ success: true, data: serializeProduct(req, p) });
   } catch(e) { 
@@ -93,7 +93,7 @@ router.put('/:id', (req, res) => {
 // DELETE /api/products/:id - удалить
 router.delete('/:id', (req, res) => {
   try {
-    const ok = products.remove(parseInt(req.params.id));
+    const ok = products.remove(req.params.id);
     if (!ok) return res.status(404).json({ success: false, error: 'Not found' });
     res.json({ success: true, message: 'Deleted' });
   } catch(e) { 

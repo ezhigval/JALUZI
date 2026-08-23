@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Pack local SQLite + uploads so they can be copied to the VM once.
 # Usage: ./deploy/pack-local-data.sh
-# Then: scp /tmp/jaluzi-data.tar.gz user@VM:/tmp/
+# Then: scp -i <ssh-key> /tmp/jaluzi-data.tar.gz jaluzi-admin@<VM_IP>:/tmp/
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="${1:-/tmp/jaluzi-data.tar.gz}"
@@ -24,6 +24,6 @@ fi
 tar -czf "${OUT}" -C "${TMP}" data uploads
 echo "Archive: ${OUT}"
 echo "On the VM, after the first compose up:"
-echo "  docker compose stop api"
+echo "  docker compose -p piter-jaluzi stop api worker"
 echo "  docker run --rm -v piter-jaluzi_jaluzi-data:/var/data/jaluzi -v /tmp/jaluzi-data.tar.gz:/tmp/jaluzi-data.tar.gz alpine sh -c 'mkdir -p /var/data/jaluzi && tar -xzf /tmp/jaluzi-data.tar.gz -C /var/data/jaluzi'"
-echo "  docker compose start api"
+echo "  docker compose -p piter-jaluzi start api worker"

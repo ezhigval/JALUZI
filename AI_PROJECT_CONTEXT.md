@@ -15,15 +15,18 @@
 - текущий публичный домен фронтенда: `https://piter-jaluzi.ru`
 - рабочий email бренда: `info@piter-jaluzi.ru`
 
-Технически проект — монорепозиторий из двух Node-пакетов:
+Технически проект — монорепозиторий `ezhigval/JALUZI` из двух Node-пакетов:
 
 - `front/` — статический сайт на Astro
 - `back/` — Express API + Telegram admin bot + email listener + SQLite
+- `deploy/` — Docker Compose, Caddy, Cloudflare Telegram proxy
 
 Типовая production-схема:
 
-- одна Ubuntu VM в Yandex Cloud
-- Caddy отдаёт `front/dist` и проксирует `/api`, `/uploads`, `/health` в API
+- одна Ubuntu VM в Yandex Cloud (`fv41g9i64264k1j55ogh`, login `jaluzi-admin`)
+- Caddy отдаёт `front/dist` и проксирует публичный `/api`, `/uploads`, `/health` в контейнер `api`
+- контейнер `worker` держит Telegram polling и IMAP, без publish-портов
+- Telegram Bot API с VM в РФ идёт через Cloudflare Worker (`TELEGRAM_API_ROOT`)
 - данные API живут на Docker-томе `STORAGE_DIR=/var/data/jaluzi`
 - домен `piter-jaluzi.ru` остаётся на REG.RU, A-записи правятся вручную
 - почта остаётся на `mail.hosting.reg.ru`
@@ -71,7 +74,7 @@
 - `front/.git/`, `back/.git/`
 - `back/logs/`
 
-Корневой каталог — единый git-репозиторий `ezhigval/piter-jaluzi`.
+Корневой каталог — единый git-репозиторий `ezhigval/JALUZI`.
 `front/` и `back/` больше не являются отдельными git-репозиториями.
 
 ## 5. Корневая структура
@@ -908,13 +911,18 @@ Order limiter:
 
 ### 13.2. Production режим
 
-Одна Ubuntu VM в Yandex Cloud, Docker Compose:
+Одна Ubuntu VM в Yandex Cloud, Docker Compose (`docker-compose.yml`):
 
-- Caddy отдаёт статику и проксирует `/api`, `/uploads`, `/health`
+- Caddy отдаёт статику и проксирует публичный `/api`, `/uploads`, `/health`
+- контейнер `api` с `PROCESS_ROLE=api` (публичный HTTP, Telegram send-only)
+- контейнер `worker` с `PROCESS_ROLE=worker` (Telegram polling + IMAP)
 - фронт собирается с пустым `PUBLIC_API_URL` (same-origin)
 - `PUBLIC_API_BASE_URL=https://piter-jaluzi.ru`
-- `STORAGE_DIR=/var/data/jaluzi` на Docker-томе
+- `STORAGE_DIR=/var/data/jaluzi` на Docker-томе `piter-jaluzi_jaluzi-data`
+- `TELEGRAM_API_ROOT` указывает на Cloudflare Worker, не на `api.telegram.org`
 - домен и почта остаются на REG.RU, вручную меняются только A-записи `@` и `www`
+
+Локальный Docker без TLS: `docker compose -f docker-compose.dev.yml up --build` → `http://localhost:8080`.
 
 ### 13.3. Важное про диск
 
@@ -933,10 +941,12 @@ Order limiter:
 Минимум:
 
 - `NODE_ENV=production`
+- `PROCESS_ROLE=api` (worker-контейнер переопределяет на `worker`)
 - `CORS_ORIGIN=https://piter-jaluzi.ru,https://www.piter-jaluzi.ru`
 - `STORAGE_DIR=/var/data/jaluzi`
 - `PUBLIC_API_BASE_URL=https://piter-jaluzi.ru`
 - `PUBLIC_API_URL=`
+- `TELEGRAM_API_ROOT=https://piter-jaluzi-tg-proxy.<subdomain>.workers.dev`
 
 Остальное:
 
@@ -1121,7 +1131,9 @@ ALLOW_WRITE_TESTS=1 node test-order.js
 - бэкенд проходит syntax/check
 - контракт фронт-бэк проходит
 - локальная схема `localhost:4321 -> localhost:3001` рабочая
-- проект подготовлен под схему `Yandex Cloud Ubuntu VM + REG.RU DNS`
+- проект подготовлен под схему `Yandex Cloud Ubuntu VM + Docker Compose + REG.RU DNS + Cloudflare Telegram proxy`
+- канонический репозиторий: `ezhigval/JALUZI`
+- бренд и домен приведены к:
 - бренд и домен приведены к:
   - `Питер-Жалюзи`
   - `piter-jaluzi.ru`

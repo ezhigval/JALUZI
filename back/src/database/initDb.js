@@ -89,14 +89,14 @@ function migrateFromJson() {
 
     if (data.products?.length) {
       const rows = data.products.map(p => ({
-        id: p.id,
+        id: Number.parseInt(p.id, 10) || p.id,
         name: p.name,
         category: p.category,
         price: p.price,
         description: p.description || '',
         image: p.image || '',
         in_stock: p.in_stock ? 1 : 0,
-        created_at: p.created_at,
+        created_at: p.created_at || new Date().toISOString(),
         updated_at: p.updated_at || null
       }));
       insertAll(rows, insertProduct);
@@ -104,13 +104,13 @@ function migrateFromJson() {
 
     if (data.orders?.length) {
       const rows = data.orders.map(o => ({
-        id: o.id,
+        id: Number.parseInt(o.id, 10) || o.id,
         name: o.name,
         phone: o.phone,
         blindsType: o.blindsType || '',
         blinds_type: o.blinds_type || '',
         message: o.message || '',
-        created_at: o.created_at
+        created_at: o.created_at || new Date().toISOString()
       }));
       insertAll(rows, insertOrder);
     }
@@ -154,6 +154,7 @@ function initDb() {
 
   db = new Database(DB_PATH);
   db.pragma('journal_mode = WAL');
+  db.pragma('busy_timeout = 5000');
   db.pragma('foreign_keys = ON');
 
   createTables();

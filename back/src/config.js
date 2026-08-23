@@ -44,9 +44,13 @@ const publicApiBaseUrl =
   normalizeUrl(process.env.PUBLIC_API_BASE_URL) ||
   normalizeUrl(process.env.RENDER_EXTERNAL_URL) ||
   apiUrl;
+const processRole = String(process.env.PROCESS_ROLE || 'all').trim().toLowerCase();
+const telegramApiRoot =
+  normalizeUrl(process.env.TELEGRAM_API_ROOT) || 'https://api.telegram.org';
 
 module.exports = {
   port,
+  processRole,
   apiUrl,
   publicApiBaseUrl,
   corsOrigins: parseOrigins(process.env.CORS_ORIGIN),
@@ -57,6 +61,7 @@ module.exports = {
   authorizedChatsFile,
   telegramBotToken: process.env.TELEGRAM_BOT_TOKEN || '',
   telegramBotPassword: process.env.TELEGRAM_BOT_PASSWORD || '',
+  telegramApiRoot,
   email: {
     host: process.env.EMAIL_HOST || '',
     port: Number(process.env.EMAIL_PORT) || 587,

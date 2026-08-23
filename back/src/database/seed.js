@@ -30,6 +30,11 @@ function seed() {
     return;
   }
 
+  if (process.env.NODE_ENV === 'production' && process.env.ALLOW_SCRAPER_SEED !== '1') {
+    console.log('⏭️  Skipping scraper catalog seed in production (use db.seed.json via entrypoint)');
+    return;
+  }
+
   const db = getDb();
 
   const insertProduct = db.prepare(

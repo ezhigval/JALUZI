@@ -11,6 +11,8 @@ if [[ ! -f .env ]]; then
   exit 1
 fi
 
+export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-piter-jaluzi}"
+
 if [[ -d .git ]]; then
   git pull --ff-only
 fi

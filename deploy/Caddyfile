@@ -16,7 +16,9 @@ piter-jaluzi.ru {
 		-Server
 	}
 
-	handle /api/* {
+	# Public HTTP only. Telegram/IMAP live in the worker container.
+	@publicApi path /api /api/ /api/products* /api/orders* /api/reviews*
+	handle @publicApi {
 		reverse_proxy api:3001
 	}
 

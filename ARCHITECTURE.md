@@ -4,13 +4,14 @@
 
 ## Состав проекта
 
-Это один git-репозиторий.
+Канонический git-репозиторий: `https://github.com/ezhigval/JALUZI`.
 
 - `front/` — статический сайт на Astro 6.
 - `back/` — Express API, Telegram-бот для администрирования и почтовый listener на ImapFlow.
 - `deploy/` — образы, Caddyfile и скрипты для Ubuntu VM.
 
 `front` и `back` остаются отдельными Node-проектами со своими `package.json`.
+Корневой `package.json` даёт общие скрипты (`npm run dev`, `npm run compose:dev`).
 
 ## Основной runtime-поток
 
@@ -64,14 +65,21 @@
 
 ### Ключевые модули
 
-- `back/src/index.js` — запуск HTTP API
+- `back/src/index.js` — запуск HTTP API и/или worker по `PROCESS_ROLE`
 - `back/src/config.js` — разбор env
 - `back/src/database/db.js` и `initDb.js` — SQLite + миграция из JSON
-- `back/src/routes/*`
+- `back/src/routes/publicProducts.js`, `publicReviews.js` — публичный HTTP
+- `back/src/routes/products.js`, `reviews.js` — admin HTTP только вне production
 - `back/src/services/email.js`
 - `back/src/services/emailListener.js`
 - `back/src/services/telegram.js`
 - `back/src/services/uploads.js`
+
+`PROCESS_ROLE`:
+
+- `all` — локальная разработка (HTTP + Telegram + IMAP)
+- `api` — публичный HTTP, Telegram только send-only для заявок
+- `worker` — Telegram polling + IMAP, без HTTP
 
 ### Данные
 
@@ -83,11 +91,13 @@
 
 ## Production
 
-Одна VM в Yandex Cloud:
+Одна VM в Yandex Cloud (`fv41g9i64264k1j55ogh`, login `jaluzi-admin`):
 
 - Caddy слушает 80/443, Let's Encrypt, редирект `www` → apex
 - контейнер `api` слушает только внутренний `:3001`
-- том `jaluzi-data` хранит SQLite и uploads
+- контейнер `worker` без publish-портов
+- том `piter-jaluzi_jaluzi-data` хранит SQLite и uploads
+- Telegram Bot API — через Cloudflare Worker (`TELEGRAM_API_ROOT`)
 - почта остаётся на REG.RU
 
 Подробности — в [DEPLOY.md](./DEPLOY.md).

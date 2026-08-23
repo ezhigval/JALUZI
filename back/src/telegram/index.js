@@ -252,19 +252,29 @@ function setupHandlers(telegrafApp, botApi) {
   telegrafApp.command('help', async (ctx) => showHelp(botApi, ctx.chat.id));
 }
 
-function initBot() {
+function initBot({ mode = 'full' } = {}) {
   if (!config.telegramBotToken) {
     console.error('❌ TELEGRAM_BOT_TOKEN not set');
     return null;
   }
 
   try {
-    app = new Telegraf(config.telegramBotToken, { handlerTimeout: 15000 });
+    app = new Telegraf(config.telegramBotToken, {
+      handlerTimeout: 15000,
+      telegram: {
+        apiRoot: config.telegramApiRoot
+      }
+    });
     bot = createBotApi(app);
 
     app.catch((error) => {
       console.log('⚠️  TG polling:', error.code || error.name, error.message);
     });
+
+    if (mode === 'send-only') {
+      console.log('🤖 Telegram send-only client ready via ' + config.telegramApiRoot);
+      return bot;
+    }
 
     setupHandlers(app, bot);
 
@@ -272,7 +282,7 @@ function initBot() {
       dropPendingUpdates: false,
       allowedUpdates: ['message', 'callback_query']
     }).then(() => {
-      console.log('🤖 Telegram bot initialized');
+      console.log('🤖 Telegram bot initialized via ' + config.telegramApiRoot);
     }).catch((error) => {
       console.error('❌ Telegram bot init failed:', error.message);
       bot = null;
