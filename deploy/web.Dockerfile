@@ -12,7 +12,7 @@ ENV SITE_URL=$SITE_URL
 
 RUN npm run build
 
-# caddy official image; if Hub is blocked, reuse the already-running web image and docker cp Caddyfile.
-FROM caddy:2.10-alpine
+# mirror.gcr.io is reachable from Yandex Cloud RU; Docker Hub often times out.
+FROM mirror.gcr.io/library/caddy:2.10-alpine
 COPY deploy/Caddyfile /etc/caddy/Caddyfile
 COPY --from=build /app/dist /srv

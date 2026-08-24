@@ -82,10 +82,14 @@ else
   log "force redeploy at ${LOCAL:0:7}"
 fi
 
-if docker compose --env-file .env up -d --build >>"${LOG_FILE}" 2>&1; then
-  log "compose up OK"
+# Never force a Hub pull for web; Caddy image on this VM is already local.
+# Rebuild api/worker from mirror.gcr.io; copy sources if that still fails.
+if docker compose --env-file .env up -d --build api worker mailpit >>"${LOG_FILE}" 2>&1; then
+  log "api/worker/mailpit up OK"
 else
   log "compose build failed — syncing source into running containers"
+  docker compose --env-file .env up -d mailpit >>"${LOG_FILE}" 2>&1 || true
+  docker compose --env-file .env up -d --no-build api worker >>"${LOG_FILE}" 2>&1 || true
   API_CID="$(docker compose --env-file .env ps -q api || true)"
   WORKER_CID="$(docker compose --env-file .env ps -q worker || true)"
   if [[ -n "${API_CID}" ]]; then
@@ -94,10 +98,16 @@ else
   if [[ -n "${WORKER_CID}" ]]; then
     docker cp back/src/. "${WORKER_CID}:/app/src/" || true
   fi
-  docker compose --env-file .env up -d mailpit >>"${LOG_FILE}" 2>&1 || true
-  docker compose --env-file .env up -d >>"${LOG_FILE}" 2>&1 || true
   docker compose --env-file .env restart api worker >>"${LOG_FILE}" 2>&1 || true
 fi
+
+WEB_CID="$(docker compose --env-file .env ps -q web || true)"
+if [[ -n "${WEB_CID}" ]]; then
+  docker cp deploy/Caddyfile "${WEB_CID}:/etc/caddy/Caddyfile" || true
+  docker exec "${WEB_CID}" caddy reload --config /etc/caddy/Caddyfile >>"${LOG_FILE}" 2>&1 \
+    || docker compose --env-file .env restart web >>"${LOG_FILE}" 2>&1 || true
+fi
+docker compose --env-file .env up -d --no-build web >>"${LOG_FILE}" 2>&1 || true
 
 docker compose --env-file .env ps >>"${LOG_FILE}" 2>&1 || true
 log "done"
