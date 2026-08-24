@@ -72,7 +72,12 @@ fi
 
 if [[ "${LOCAL}" != "${REMOTE_REV}" ]]; then
   log "update ${LOCAL:0:7} → ${REMOTE_REV:0:7} (${REMOTE}/${BRANCH})"
-  git merge --ff-only "${REMOTE_REV}"
+  if git merge-base --is-ancestor HEAD "${REMOTE_REV}" 2>/dev/null; then
+    git merge --ff-only "${REMOTE_REV}"
+  else
+    log "unrelated histories — overlay checkout ${REMOTE}/${BRANCH}"
+    git checkout "${REMOTE_REV}" -- .
+  fi
 else
   log "force redeploy at ${LOCAL:0:7}"
 fi

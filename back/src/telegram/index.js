@@ -271,7 +271,7 @@ function initBot({ mode = 'full' } = {}) {
       console.log('⚠️  TG update:', error.code || error.name, error.message);
     });
 
-    if (mode === 'send-only') {
+    if (mode === 'send-only' || mode === 'send-only') {
       console.log('🤖 Telegram send-only client ready via ' + config.telegramApiRoot);
       return Promise.resolve(bot);
     }
