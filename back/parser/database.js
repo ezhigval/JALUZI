@@ -18,13 +18,11 @@ export async function saveToDatabase(records) {
             }
         }
 
-        // Объединяем старые и новые записи
-        db = [...db, ...records];
+        db = records;
 
-        // Сохраняем обратно в файл с форматированием
         await fsPromises.writeFile(DB_PATH, JSON.stringify(db, null, 2), 'utf-8');
 
-        log('info', 'database', `Сохранено ${records.length} записей (всего: ${db.length})`);
+        log('info', 'database', `Сохранено ${records.length} записей (каталог перезаписан)`);
         return true;
 
     } catch (err) {

@@ -21,7 +21,7 @@ export async function parseCategory(browser, category) {
         await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
 
         // Дополнительная пауза для отработки динамических скриптов (Swiper, lazy-load)
-        await page.waitForTimeout(CONFIG.delays.pageLoad);
+        await new Promise((r) => setTimeout(r, CONFIG.delays.pageLoad));
 
         // Ожидание появления целевых элементов
         await page.waitForSelector(CONFIG.selectors.slide, { timeout: 10000 }).catch(() => {
