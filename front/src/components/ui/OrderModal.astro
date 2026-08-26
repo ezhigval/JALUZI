@@ -1,24 +1,28 @@
 ---
 import config from '../../data/config.json';
 ---
-<div id="order-modal" class="modal-overlay">
+<div id="order-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="order-modal-title">
   <div class="modal-content">
-    <button id="order-modal-close" class="modal-close-btn">×</button>
+    <button id="order-modal-close" class="modal-close-btn" type="button" aria-label="Закрыть">×</button>
     <div class="modal-header">
-      <h2>Заказать жалюзи</h2>
+      <h2 id="order-modal-title">Заказать жалюзи</h2>
       <p>Оставьте заявку и мы перезвоним</p>
     </div>
     <form id="order-form" class="modal-body">
-      <input type="text" name="name" placeholder="Ваше имя" required class="modal-input" />
-      <input type="tel" name="phone" placeholder="Телефон" required class="modal-input" />
-      <select name="blindsType" required class="modal-input modal-select">
+      <label class="sr-only" for="order-name">Ваше имя</label>
+      <input id="order-name" type="text" name="name" placeholder="Ваше имя" required class="modal-input" autocomplete="name" />
+      <label class="sr-only" for="order-phone">Телефон</label>
+      <input id="order-phone" type="tel" name="phone" placeholder="Телефон" required class="modal-input" autocomplete="tel" inputmode="tel" />
+      <label class="sr-only" for="order-blinds-type">Тип жалюзи</label>
+      <select id="order-blinds-type" name="blindsType" required class="modal-input modal-select">
         <option value="" disabled selected>Тип жалюзи</option>
         <option value="Рулонные">Рулонные</option>
         <option value="Вертикальные">Вертикальные</option>
         <option value="Горизонтальные">Горизонтальные</option>
         <option value="Другое">Другое</option>
       </select>
-      <textarea name="message" rows="3" placeholder="Комментарий" class="modal-textarea"></textarea>
+      <label class="sr-only" for="order-message">Комментарий</label>
+      <textarea id="order-message" name="message" rows="3" placeholder="Комментарий" class="modal-textarea"></textarea>
       <button type="submit" class="btn btn-primary">Отправить заявку</button>
       <p id="order-form-status" class="form-status" aria-live="polite"></p>
     </form>
