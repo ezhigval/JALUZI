@@ -44,7 +44,8 @@ function renderProductPage(req, product) {
       availability: product.in_stock
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock',
-      url: canonical
+      url: canonical,
+      seller: { '@id': `${site}/#business` }
     }
   };
 
@@ -57,6 +58,7 @@ function renderProductPage(req, product) {
   <meta name="description" content="${escapeHtml(description)}" />
   <link rel="canonical" href="${escapeHtml(canonical)}" />
   <meta property="og:type" content="product" />
+  <meta property="og:locale" content="ru_RU" />
   <meta property="og:site_name" content="Питер-Жалюзи" />
   <meta property="og:title" content="${escapeHtml(title)}" />
   <meta property="og:description" content="${escapeHtml(description)}" />

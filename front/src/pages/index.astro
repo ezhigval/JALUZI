@@ -9,10 +9,11 @@ import Repair from '../components/sections/Repair.astro';
 import About from '../components/sections/About.astro';
 import ContactForm from '../components/sections/ContactForm.astro';
 import Footer from '../components/layout/Footer.astro';
+import config from '../data/config.json';
 ---
-<BaseLayout 
-  title="Жалюзи на заказ | Производство и установка" 
-  description="Изготовление жалюзи любых видов за 3 дня. Бесплатный замер. Гарантия 1 год."
+<BaseLayout
+  title={config.seo.title}
+  description={config.seo.description}
   canonical="/"
 >
   <OrderModal />

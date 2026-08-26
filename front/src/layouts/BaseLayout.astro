@@ -6,12 +6,86 @@ import '../styles/components.css';
 const {
   title = config.seo.title,
   description = config.seo.description,
-  canonical = '/'
+  canonical = '/',
+  ogType = 'website',
+  noindex = false
 } = Astro.props;
 
 const API_URL = import.meta.env.PUBLIC_API_URL ?? '';
-const SITE_URL = import.meta.env.SITE_URL || Astro.site?.toString() || 'https://piter-jaluzi.ru';
+const SITE_URL = (import.meta.env.SITE_URL || Astro.site?.toString() || 'https://piter-jaluzi.ru').replace(/\/+$/, '');
 const canonicalUrl = new URL(canonical, SITE_URL).toString();
+const ogImagePath = config.seo.ogImage || '/background.jpg';
+const ogImageUrl = new URL(ogImagePath, SITE_URL).toString();
+
+const googleVerification = (
+  import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION ||
+  config.seo.googleSiteVerification ||
+  ''
+).trim();
+const yandexVerification = (
+  import.meta.env.PUBLIC_YANDEX_VERIFICATION ||
+  config.seo.yandexVerification ||
+  ''
+).trim();
+const yandexMetrikaId = (import.meta.env.PUBLIC_YANDEX_METRIKA_ID || '').trim();
+const gaMeasurementId = (import.meta.env.PUBLIC_GA_MEASUREMENT_ID || '').trim();
+
+const localBusinessLd = {
+  '@context': 'https://schema.org',
+  '@type': 'HomeAndConstructionBusiness',
+  '@id': `${SITE_URL}/#business`,
+  name: config.company.name,
+  url: SITE_URL,
+  image: ogImageUrl,
+  logo: `${SITE_URL}/icon.svg`,
+  description: config.seo.description,
+  telephone: config.company.phone,
+  email: config.company.email,
+  priceRange: config.company.priceRange || '₽₽',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: config.company.address,
+    addressLocality: config.company.city,
+    addressRegion: config.company.region,
+    postalCode: config.company.postalCode,
+    addressCountry: config.company.country
+  },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: config.company.geo.lat,
+    longitude: config.company.geo.lng
+  },
+  openingHoursSpecification: [
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      opens: '09:00',
+      closes: '19:00'
+    },
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: 'Saturday',
+      opens: '10:00',
+      closes: '17:00'
+    }
+  ],
+  areaServed: {
+    '@type': 'City',
+    name: 'Санкт-Петербург'
+  },
+  sameAs: []
+};
+
+const websiteLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  '@id': `${SITE_URL}/#website`,
+  url: SITE_URL,
+  name: config.company.name,
+  description: config.seo.description,
+  publisher: { '@id': `${SITE_URL}/#business` },
+  inLanguage: 'ru-RU'
+};
 ---
 <!DOCTYPE html>
 <html lang="ru">
@@ -19,19 +93,66 @@ const canonicalUrl = new URL(canonical, SITE_URL).toString();
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
+    {config.seo.keywords ? <meta name="keywords" content={config.seo.keywords} /> : null}
     <meta name="theme-color" content="#2563EB" />
-    <meta property="og:type" content="website" />
+    <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large'} />
+    <meta name="googlebot" content={noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large'} />
+    <meta name="yandex" content={noindex ? 'noindex, nofollow' : 'index, follow'} />
+    <meta name="geo.region" content="RU-SPE" />
+    <meta name="geo.placename" content={config.company.city} />
+    <meta name="geo.position" content={`${config.company.geo.lat};${config.company.geo.lng}`} />
+    <meta name="ICBM" content={`${config.company.geo.lat}, ${config.company.geo.lng}`} />
+    {googleVerification ? <meta name="google-site-verification" content={googleVerification} /> : null}
+    {yandexVerification ? <meta name="yandex-verification" content={yandexVerification} /> : null}
+    <meta property="og:type" content={ogType} />
+    <meta property="og:locale" content="ru_RU" />
     <meta property="og:site_name" content={config.company.name} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:alt" content={`${config.company.name} — жалюзи на заказ`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
     <link rel="canonical" href={canonicalUrl} />
     <link rel="manifest" href="/manifest.json" />
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <title>{title}</title>
+    <script type="application/ld+json" set:html={JSON.stringify(localBusinessLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(websiteLd)} />
   </head>
   <body data-api-url={API_URL}>
     <slot />
     <script type="module" src="/scripts/main.js" is:inline></script>
+    {yandexMetrikaId ? (
+      <>
+        <script is:inline define:vars={{ yandexMetrikaId }}>
+          (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+          m[i].l=1*new Date();
+          for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+          k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+          (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+          ym(Number(yandexMetrikaId), "init", { clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true });
+        </script>
+        <noscript>
+          <div>
+            <img src={`https://mc.yandex.ru/watch/${yandexMetrikaId}`} style="position:absolute; left:-9999px;" alt="" />
+          </div>
+        </noscript>
+      </>
+    ) : null}
+    {gaMeasurementId ? (
+      <>
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}></script>
+        <script is:inline define:vars={{ gaMeasurementId }}>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', gaMeasurementId);
+        </script>
+      </>
+    ) : null}
   </body>
 </html>

@@ -1,6 +1,6 @@
 # Deploy: Яндекс Облако + Mailpit + Cloudflare Telegram + GitHub autodeploy
 
-Дата актуализации: 2026-08-24
+Дата актуализации: 2026-08-26
 
 Канонический git-репозиторий: `https://github.com/ezhigval/JALUZI`.
 
@@ -13,6 +13,13 @@ Telegram admin bot работает во `worker`. Исходящие заявк
 - Товары из парсера Intersklad помечаются `source=parser`: видны в каталоге (те же карточки/модалки), **без** отдельных SEO-страниц и без попадания в sitemap.
 - Товары, добавленные вручную (Telegram и т.п.), получают `source=manual`, slug и страницу `/catalog/p/<slug>` + запись в `/sitemap.xml`.
 - Повторный импорт парсера заменяет только `parser`-строки и **не удаляет** ручные товары.
+
+### Google Search Console + Яндекс.Вебмастер
+
+1. [Google Search Console](https://search.google.com/search-console) → ресурс `https://piter-jaluzi.ru` → подтверждение meta `google-site-verification` (код в `.env` / `config.json`).
+2. [Яндекс.Вебмастер](https://webmaster.yandex.ru) → сайт → HTML-файл ` /yandex_409902539b5ca292.html` или meta `yandex-verification`.
+3. После деплоя отправить sitemap: `https://piter-jaluzi.ru/sitemap.xml`.
+4. Для Метрики/GA задать `PUBLIC_YANDEX_METRIKA_ID` / `PUBLIC_GA_MEASUREMENT_ID` и пересобрать `web`.
 
 Домен DNS остаётся на REG.RU. MX для боевой почты не трогаем; локальный Mailpit — только исходящие заявки с сайта.
 
@@ -32,7 +39,7 @@ Telegram admin bot работает во `worker`. Исходящие заявк
 | --- | --- |
 | Hostname | `compute-vm-2-2-20-ssd-1787471749812` |
 | Login | `smailikin70` |
-| Публичный IPv4 | `158.160.139.202` |
+| Публичный IPv4 | `93.77.163.4` |
 | Каталог | `/opt/piter-jaluzi` |
 
 Inbound SSH с чужих сетей часто режется до eth0. Рабочие каналы доступа:
@@ -56,8 +63,8 @@ docker compose -f docker-compose.dev.yml up --build
 
 | Тип | Хост | Значение |
 | --- | --- | --- |
-| A | `@` | `158.160.139.202` |
-| A | `www` | `158.160.139.202` |
+| A | `@` | `93.77.163.4` |
+| A | `www` | `93.77.163.4` |
 
 MX / SPF / DKIM не трогать.
 
@@ -85,20 +92,48 @@ Caddy отдаёт `POST /telegram/webhook` на `api`. Бот вызывает 
 
 Caddy сам выпускает сертификат для `piter-jaluzi.ru`, когда:
 
-1. A-записи `@` и `www` указывают на IP VM (`158.160.139.202`), не на REG.RU parking.
+1. A-записи `@` и `www` указывают на IP VM (`93.77.163.4`), не на REG.RU parking.
 2. С интернета открыты `:80` и `:443` до этой VM.
 3. В `.env` задан `ACME_EMAIL`.
 
 Проверка:
 
 ```bash
-dig +short A piter-jaluzi.ru   # должно быть 158.160.139.202
+dig +short A piter-jaluzi.ru   # должно быть 93.77.163.4
 curl -fsS https://piter-jaluzi.ru/health
 docker compose logs web | tail -50
 ```
 
 Если домен ещё на `31.31.x.x` (parking REG.RU) — сертификат и webhook не заработают, пока не смените A-записи.
-## 4. Первый запуск / обновление на VM
+
+## 4. Google Search Console и Яндекс.Вебмастер
+
+Техническая база (JSON-LD LocalBusiness/WebSite, Open Graph, `robots.txt` Host/Clean-param, sitemap) уже в коде. Чтобы поисковики приняли сайт:
+
+1. Зарегистрируйте сайт в [Google Search Console](https://search.google.com/search-console) и [Яндекс.Вебмастер](https://webmaster.yandex.ru) как `https://piter-jaluzi.ru`.
+2. Выберите проверку через HTML-meta (`google-site-verification` / `yandex-verification`) и скопируйте **только значение** `content=…`.
+3. На VM в `/opt/piter-jaluzi/.env` добавьте (и при необходимости ID счётчиков):
+
+```env
+PUBLIC_GOOGLE_SITE_VERIFICATION=<код из Search Console>
+PUBLIC_YANDEX_VERIFICATION=<код из Вебмастера>
+PUBLIC_YANDEX_METRIKA_ID=
+PUBLIC_GA_MEASUREMENT_ID=
+```
+
+4. Пересоберите фронт (переменные `PUBLIC_*` вшиваются в образ Astro на этапе `build`, hot-patch HTML недостаточен):
+
+```bash
+cd /opt/piter-jaluzi
+docker compose build web
+docker compose up -d web
+```
+
+5. В обоих кабинетах подтвердите владение, затем отправьте sitemap: `https://piter-jaluzi.ru/sitemap.xml`.
+
+Рост позиций занимает время; этот шаг только подключает индексацию и аналитику.
+
+## 5. Первый запуск / обновление на VM
 
 ```bash
 cd /opt/piter-jaluzi
@@ -110,11 +145,11 @@ sudo ./deploy/install-autodeploy.sh
 Mailpit UI с ноутбука:
 
 ```bash
-ssh -L 8025:127.0.0.1:8025 smailikin70@158.160.139.202
+ssh -L 8025:127.0.0.1:8025 smailikin70@93.77.163.4
 # открыть http://127.0.0.1:8025
 ```
 
-## 5. Постоянный доступ агента (не Pinggy)
+## 6. Постоянный доступ агента (не Pinggy)
 
 ### A. Autodeploy с GitHub (рекомендуется)
 
@@ -141,7 +176,7 @@ sudo ./deploy/install-cloudflared.sh
 
 В Zero Trust привяжите hostname → `ssh://localhost:22`.
 
-## 6. Почта
+## 7. Почта
 
 По умолчанию исходящие заявки → **Mailpit** (`EMAIL_HOST=mailpit`, порт `1025`).  
 IMAP listener выключен (`INCOMING_EMAIL_HOST=` пустой), пока REG.RU пароль не починен.
@@ -156,7 +191,7 @@ EMAIL_USER=info@piter-jaluzi.ru
 EMAIL_PASS=…
 ```
 
-## 7. Образы без Docker Hub
+## 8. Образы без Docker Hub
 
 `deploy/api.Dockerfile` берёт Node с `mirror.gcr.io`.  
 Mailpit — с `ghcr.io/axllent/mailpit` (Hub с VM часто timeout).
