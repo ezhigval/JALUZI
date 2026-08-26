@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
  * Import Intersklad parser output into the live SQLite catalog.
+ * Replaces only parser-sourced rows; manual/SEO products are preserved.
  *
  * Usage inside the api container (after docker cp of json + images):
  *   PARSED_JSON=/tmp/parsed-catalog.json \
@@ -12,6 +13,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { getDb, initDb } = require('../database/initDb');
 const config = require('../config');
+const { SOURCE_PARSER } = require('../utils/productMeta');
 
 const CATEGORY_MAP = {
   'tkani-vertikalnye': 'Вертикальные',
@@ -78,8 +80,8 @@ function main() {
   const db = getDb();
   const now = new Date().toISOString();
   const insert = db.prepare(
-    'INSERT INTO products (id, name, category, price, description, image, in_stock, created_at, updated_at) ' +
-      'VALUES (@id, @name, @category, @price, @description, @image, @in_stock, @created_at, @updated_at)'
+    'INSERT INTO products (id, name, category, price, description, image, in_stock, source, slug, created_at, updated_at) ' +
+      'VALUES (@id, @name, @category, @price, @description, @image, @in_stock, @source, @slug, @created_at, @updated_at)'
   );
 
   const products = items
@@ -92,12 +94,18 @@ function main() {
       description: item.linkFull ? String(item.linkFull).slice(0, 500) : '',
       image: copyImage(item),
       in_stock: 1,
+      source: SOURCE_PARSER,
+      slug: null,
       created_at: now,
       updated_at: now
     }));
 
+  const beforeManual = db
+    .prepare("SELECT COUNT(*) AS c FROM products WHERE source != ?")
+    .get(SOURCE_PARSER).c;
+
   const tx = db.transaction(() => {
-    db.prepare('DELETE FROM products').run();
+    db.prepare('DELETE FROM products WHERE source = ?').run(SOURCE_PARSER);
     for (const product of products) {
       insert.run(product);
     }
@@ -105,10 +113,17 @@ function main() {
   tx();
 
   const count = db.prepare('SELECT COUNT(*) AS c FROM products').get().c;
+  const parserCount = db
+    .prepare('SELECT COUNT(*) AS c FROM products WHERE source = ?')
+    .get(SOURCE_PARSER).c;
+  const manualCount = db
+    .prepare('SELECT COUNT(*) AS c FROM products WHERE source != ?')
+    .get(SOURCE_PARSER).c;
   const byCat = db
     .prepare('SELECT category, COUNT(*) AS c FROM products GROUP BY category ORDER BY c DESC')
     .all();
-  console.log(`Imported ${count} products`);
+  console.log(`Imported ${parserCount} parser products (kept ${manualCount} manual, was ${beforeManual})`);
+  console.log(`Total products: ${count}`);
   for (const row of byCat) {
     console.log(`  ${row.category}: ${row.c}`);
   }

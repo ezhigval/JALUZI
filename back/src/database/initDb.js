@@ -18,6 +18,8 @@ function createTables() {
       description TEXT DEFAULT '',
       image TEXT DEFAULT '',
       in_stock INTEGER DEFAULT 1,
+      source TEXT NOT NULL DEFAULT 'manual',
+      slug TEXT,
       created_at TEXT NOT NULL,
       updated_at TEXT
     );
@@ -55,6 +57,48 @@ function createTables() {
   `);
 }
 
+function tableColumns(table) {
+  return db.prepare(`PRAGMA table_info(${table})`).all().map((row) => row.name);
+}
+
+function migrateProductMeta() {
+  const {
+    SOURCE_PARSER,
+    SOURCE_MANUAL,
+    looksLikeParsedProduct,
+    buildProductSlug
+  } = require('../utils/productMeta');
+
+  const cols = tableColumns('products');
+  if (!cols.includes('source')) {
+    db.exec(`ALTER TABLE products ADD COLUMN source TEXT NOT NULL DEFAULT '${SOURCE_MANUAL}'`);
+  }
+  if (!cols.includes('slug')) {
+    db.exec('ALTER TABLE products ADD COLUMN slug TEXT');
+  }
+
+  db.exec('CREATE INDEX IF NOT EXISTS idx_products_source ON products(source)');
+  db.exec(
+    "CREATE UNIQUE INDEX IF NOT EXISTS idx_products_slug ON products(slug) WHERE slug IS NOT NULL AND slug != ''"
+  );
+
+  const products = db.prepare('SELECT id, name, image, description, source, slug FROM products').all();
+  const markParser = db.prepare('UPDATE products SET source = ? WHERE id = ?');
+  const setSlug = db.prepare('UPDATE products SET slug = ? WHERE id = ?');
+
+  for (const product of products) {
+    const source = String(product.source || SOURCE_MANUAL);
+    if (source !== SOURCE_PARSER && looksLikeParsedProduct(product)) {
+      markParser.run(SOURCE_PARSER, product.id);
+      product.source = SOURCE_PARSER;
+    }
+
+    if (product.source !== SOURCE_PARSER && !product.slug) {
+      setSlug.run(buildProductSlug(product.name, product.id), product.id);
+    }
+  }
+}
+
 function migrateFromJson() {
   const count = db.prepare('SELECT COUNT(*) as c FROM products').get();
   if (count.c > 0) return;
@@ -68,7 +112,7 @@ function migrateFromJson() {
     const data = JSON.parse(raw);
 
     const insertProduct = db.prepare(
-      'INSERT OR IGNORE INTO products (id, name, category, price, description, image, in_stock, created_at, updated_at) VALUES (@id, @name, @category, @price, @description, @image, @in_stock, @created_at, @updated_at)'
+      'INSERT OR IGNORE INTO products (id, name, category, price, description, image, in_stock, source, slug, created_at, updated_at) VALUES (@id, @name, @category, @price, @description, @image, @in_stock, @source, @slug, @created_at, @updated_at)'
     );
 
     const insertOrder = db.prepare(
@@ -88,17 +132,29 @@ function migrateFromJson() {
     });
 
     if (data.products?.length) {
-      const rows = data.products.map(p => ({
-        id: p.id,
-        name: p.name,
-        category: p.category,
-        price: p.price,
-        description: p.description || '',
-        image: p.image || '',
-        in_stock: p.in_stock ? 1 : 0,
-        created_at: p.created_at,
-        updated_at: p.updated_at || null
-      }));
+      const {
+        SOURCE_PARSER,
+        SOURCE_MANUAL,
+        looksLikeParsedProduct,
+        buildProductSlug
+      } = require('../utils/productMeta');
+
+      const rows = data.products.map(p => {
+        const source = looksLikeParsedProduct(p) ? SOURCE_PARSER : SOURCE_MANUAL;
+        return {
+          id: String(p.id),
+          name: p.name,
+          category: p.category,
+          price: p.price,
+          description: p.description || '',
+          image: p.image || '',
+          in_stock: p.in_stock ? 1 : 0,
+          source,
+          slug: source === SOURCE_PARSER ? null : (p.slug || buildProductSlug(p.name, p.id)),
+          created_at: p.created_at,
+          updated_at: p.updated_at || null
+        };
+      });
       insertAll(rows, insertProduct);
     }
 
@@ -158,6 +214,7 @@ function initDb() {
   db.pragma('foreign_keys = ON');
 
   createTables();
+  migrateProductMeta();
   migrateFromJson();
 
   console.log('💾 Database: SQLite (' + DB_PATH + ')');

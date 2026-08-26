@@ -42,12 +42,20 @@ function assertAllowedCors(response, path) {
 }
 
 function assertProduct(product, index) {
-  assert(typeof product.id === 'number', `products[${index}].id must be number`);
+  assert(
+    (typeof product.id === 'number' || typeof product.id === 'string') && String(product.id),
+    `products[${index}].id must be number|string`
+  );
   assert(typeof product.name === 'string' && product.name, `products[${index}].name must be string`);
   assert(typeof product.category === 'string' && product.category, `products[${index}].category must be string`);
   assert(typeof product.price === 'number' && Number.isFinite(product.price), `products[${index}].price must be number`);
   assert(typeof product.description === 'string', `products[${index}].description must be string`);
   assert(isHttpUrl(product.image), `products[${index}].image must be absolute URL`);
+  assert(
+    product.source === 'parser' || product.source === 'manual',
+    `products[${index}].source must be parser|manual`
+  );
+  assert(typeof product.indexable === 'boolean', `products[${index}].indexable must be boolean`);
 }
 
 function assertReview(review, index) {
