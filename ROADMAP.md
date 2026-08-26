@@ -7,8 +7,8 @@
 | Версия | Статус | Суть |
 | --- | --- | --- |
 | **v1** | ✅ Закрыт (прод) | Рабочий сайт на Yandex Cloud: каталог, заявки, Telegram admin, SEO-база, Метрика, CF-прокси |
-| **v2** | 🔜 Следующий | Качество кода, анти-AI следы, скорость, конверсия, боевая почта, **SEO-продвижение (Wordstat, семантика, карты)** |
-| **v3** | Идея | Категорийные лендинги, расширенная аналитика/ecommerce, бэкапы/hardening |
+| **v2** | 🔄 В работе | Качество кода, анти-AI следы, скорость, конверсия, ops, надёжность, **SEO-продвижение (Wordstat, семантика, карты, реклама)** |
+| **v3** | Идея | SSR каталог, CRM, A/B ecommerce, мульти-регион |
 
 Подробный план v2: [docs/V2.md](./docs/V2.md).
 
@@ -49,10 +49,35 @@ SEO / аналитика
 
 ## v2 — порядок работ (кратко)
 
-1. **Оптимизация кода, баги, следы ИИ** ← старт v2  
-2. Производительность (картинки, API payload, CWV)  
-3. Конверсия и доверие (описания, цены, CTA, цели Метрики)  
-4. Операционка (REG.RU почта, алерты заявок в TG, бэкапы)  
-5. **SEO-продвижение**: Wordstat → семантика → посадочные по основным запросам → локальное SEO (карты) → мониторинг и доп. каналы
+| # | Блок | Ключевые пункты |
+| --- | --- | --- |
+| **1** | Код, баги, AI-следы | Intersklad URL fix, string id, CF webhook docs, bot healthcheck, autodeploy smoke, единый стиль |
+| **2** | Производительность | WebP/AVIF, API `?category=` + slim payload, front catalog filter |
+| **3** | Конверсия | Thank-you + Metrika, «от … ₽», блок замера, отзывы + Review schema, sticky CTA |
+| **4** | Операционка | SMTP, TG алерты, бэкапы + restore test, honeypot, runbook |
+| **4.5** | Надёжность | Uptime monitoring, CI gates, staging/dev-compose |
+| **5** | SEO | Wordstat → посадочные → карты → мониторинг → **Директ/VK + сезонность + SERP audit** |
+
+### Последовательные PR (merge каждый в main)
+
+1. **PR1 docs** — полный бэклог (V2.md + этот файл)
+2. **PR2 step1** — quick wins: parser, id, DEPLOY/runbook stub
+3. **PR3 performance** — API filter, WebP, catalog front filter
+4. **PR4 conversion** — thank-you, Metrika, CTA, price stub
+5. **PR5 ops** — honeypot, backup, health, bot healthcheck
+6. **PR6 telegram** — `.env.example`, autodeploy smoke
 
 Детали и критерии приёмки — в [docs/V2.md](./docs/V2.md).
+
+---
+
+## v2 — прогресс
+
+- [ ] PR1: полный бэклог в документации
+- [ ] PR2: шаг 1 quick wins
+- [ ] PR3: шаг 2 производительность
+- [ ] PR4: шаг 3 конверсия
+- [ ] PR5: шаг 4 операционка
+- [ ] PR6: Telegram + autodeploy
+- [ ] Шаг 4.5 надёжность (частично в PR5–PR6 + CI)
+- [ ] Шаг 5 SEO (контент и внешние площадки — после кодовых PR)
