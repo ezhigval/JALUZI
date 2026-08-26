@@ -11,6 +11,7 @@ function isSeeded() {
 function seed() {
   // === ХЕЛПЕРЫ ДЛЯ КОНВЕРТАЦИИ ===
   const { randomUUID } = require('crypto');
+  const { SOURCE_PARSER } = require('../utils/productMeta');
   const generateId = () => randomUUID().replace(/-/g, '').slice(0, 6).toUpperCase();
 
   const mapJsonToProduct = (json) => ({
@@ -21,6 +22,8 @@ function seed() {
     description: null,
     image: json.imageFull || json.localPath || null,
     in_stock: 1,
+    source: SOURCE_PARSER,
+    slug: null,
     created_at: new Date().toISOString().slice(0, 19).replace('T', ' ')
   });
   // === КОНЕЦ ХЕЛПЕРОВ ===
@@ -33,8 +36,8 @@ function seed() {
   const db = getDb();
 
   const insertProduct = db.prepare(
-      'INSERT INTO products (id, name, category, price, description, image, in_stock, created_at) ' +
-      'VALUES (@id, @name, @category, @price, @description, @image, @in_stock, @created_at)'
+      'INSERT INTO products (id, name, category, price, description, image, in_stock, source, slug, created_at) ' +
+      'VALUES (@id, @name, @category, @price, @description, @image, @in_stock, @source, @slug, @created_at)'
   );
 
   const insertReview = db.prepare(

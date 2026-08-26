@@ -21,6 +21,14 @@ www.piter-jaluzi.ru {
 		reverse_proxy api:3001
 	}
 
+	handle /sitemap.xml {
+		reverse_proxy api:3001
+	}
+
+	handle /catalog/p/* {
+		reverse_proxy api:3001
+	}
+
 	handle /telegram/* {
 		reverse_proxy api:3001
 	}
@@ -56,6 +64,14 @@ piter-jaluzi.ru {
 
 	@publicApi path /api /api/ /api/products* /api/orders* /api/reviews*
 	handle @publicApi {
+		reverse_proxy api:3001
+	}
+
+	handle /sitemap.xml {
+		reverse_proxy api:3001
+	}
+
+	handle /catalog/p/* {
 		reverse_proxy api:3001
 	}
 

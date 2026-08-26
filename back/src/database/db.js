@@ -1,43 +1,80 @@
 const { getDb } = require('./initDb');
+const {
+  SOURCE_MANUAL,
+  SOURCE_PARSER,
+  normalizeSource,
+  buildProductSlug,
+  createManualProductId,
+  isSeoIndexable
+} = require('../utils/productMeta');
+
+function normalizeProductRow(row) {
+  if (!row) return null;
+  return {
+    ...row,
+    in_stock: !!row.in_stock,
+    source: normalizeSource(row.source),
+    slug: row.slug || null,
+    indexable: isSeoIndexable(row)
+  };
+}
 
 // === PRODUCTS ===
 module.exports.getAllProducts = () => {
   const db = getDb();
-  return db.prepare('SELECT * FROM products ORDER BY id').all();
+  return db.prepare('SELECT * FROM products ORDER BY created_at DESC, id').all().map(normalizeProductRow);
+};
+
+module.exports.getIndexableProducts = () => {
+  const db = getDb();
+  return db
+    .prepare("SELECT * FROM products WHERE source != ? ORDER BY created_at DESC, id")
+    .all(SOURCE_PARSER)
+    .map(normalizeProductRow);
 };
 
 module.exports.getProductById = (id) => {
   const db = getDb();
-  return db.prepare('SELECT * FROM products WHERE id = ?').get(id);
+  return normalizeProductRow(db.prepare('SELECT * FROM products WHERE id = ?').get(String(id)));
+};
+
+module.exports.getProductBySlugOrId = (value) => {
+  const db = getDb();
+  const key = decodeURIComponent(String(value || '')).trim();
+  if (!key) return null;
+  const bySlug = db.prepare('SELECT * FROM products WHERE slug = ?').get(key);
+  if (bySlug) return normalizeProductRow(bySlug);
+  return normalizeProductRow(db.prepare('SELECT * FROM products WHERE id = ?').get(key));
 };
 
 module.exports.createProduct = (data) => {
   const db = getDb();
-  const maxId = db.prepare('SELECT COALESCE(MAX(id), 0) as maxId FROM products').get();
-  const newId = maxId.maxId + 1;
   const now = new Date().toISOString();
+  const source = normalizeSource(data.source || SOURCE_MANUAL);
+  const id = data.id ? String(data.id) : createManualProductId();
   const product = {
-    id: newId,
+    id,
     name: data.name,
     category: data.category,
     price: Number(data.price),
     description: data.description || '',
     image: data.image || 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=80',
     in_stock: data.in_stock !== false ? 1 : 0,
+    source,
+    slug: source === SOURCE_PARSER ? null : (data.slug || buildProductSlug(data.name, id)),
     created_at: now,
     updated_at: null
   };
   db.prepare(
-    'INSERT INTO products (id, name, category, price, description, image, in_stock, created_at, updated_at) ' +
-    'VALUES (@id, @name, @category, @price, @description, @image, @in_stock, @created_at, @updated_at)'
+    'INSERT INTO products (id, name, category, price, description, image, in_stock, source, slug, created_at, updated_at) ' +
+    'VALUES (@id, @name, @category, @price, @description, @image, @in_stock, @source, @slug, @created_at, @updated_at)'
   ).run(product);
-  // Normalize back to boolean for backward compatibility
-  return { ...product, in_stock: !!product.in_stock };
+  return normalizeProductRow(product);
 };
 
 module.exports.updateProduct = (id, data) => {
   const db = getDb();
-  const existing = db.prepare('SELECT * FROM products WHERE id = ?').get(id);
+  const existing = db.prepare('SELECT * FROM products WHERE id = ?').get(String(id));
   if (!existing) return null;
 
   const updates = {};
@@ -48,22 +85,32 @@ module.exports.updateProduct = (id, data) => {
   if (data.image !== undefined) updates.image = data.image;
   if (data.in_stock !== undefined) updates.in_stock = data.in_stock ? 1 : 0;
   if (data.inStock !== undefined) updates.in_stock = data.inStock ? 1 : 0;
+  if (data.source !== undefined) updates.source = normalizeSource(data.source);
+  if (data.slug !== undefined) updates.slug = data.slug || null;
   updates.updated_at = new Date().toISOString();
 
+  const nextSource = updates.source || existing.source;
+  if (normalizeSource(nextSource) !== SOURCE_PARSER && !existing.slug && updates.slug === undefined) {
+    updates.slug = buildProductSlug(updates.name || existing.name, existing.id);
+  }
+  if (normalizeSource(nextSource) === SOURCE_PARSER) {
+    updates.slug = null;
+  }
+
   const keys = Object.keys(updates);
-  if (keys.length === 0) return { ...existing, in_stock: !!existing.in_stock };
+  if (keys.length === 0) return normalizeProductRow(existing);
 
   const setClause = keys.map(k => `${k} = @${k}`).join(', ');
   const stmt = db.prepare(`UPDATE products SET ${setClause} WHERE id = @id`);
-  stmt.run({ ...updates, id });
+  stmt.run({ ...updates, id: String(id) });
 
-  const updated = db.prepare('SELECT * FROM products WHERE id = ?').get(id);
-  return { ...updated, in_stock: !!updated.in_stock };
+  const updated = db.prepare('SELECT * FROM products WHERE id = ?').get(String(id));
+  return normalizeProductRow(updated);
 };
 
 module.exports.deleteProduct = (id) => {
   const db = getDb();
-  const result = db.prepare('DELETE FROM products WHERE id = ?').run(id);
+  const result = db.prepare('DELETE FROM products WHERE id = ?').run(String(id));
   return result.changes > 0;
 };
 

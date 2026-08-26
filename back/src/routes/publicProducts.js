@@ -2,11 +2,13 @@ const express = require('express');
 const router = express.Router();
 const products = require('../services/products');
 const { resolveAssetUrl } = require('../utils/http');
+const { productPath } = require('../utils/productMeta');
 
 function serializeProduct(req, product) {
   return {
     ...product,
-    image: resolveAssetUrl(req, product.image)
+    image: resolveAssetUrl(req, product.image),
+    path: productPath(product)
   };
 }
 
@@ -21,7 +23,7 @@ router.get('/', (req, res) => {
 
 router.get('/:id', (req, res) => {
   try {
-    const product = products.getById(parseInt(req.params.id, 10));
+    const product = products.getById(req.params.id);
     if (!product) {
       return res.status(404).json({ success: false, error: 'Not found' });
     }

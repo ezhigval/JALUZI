@@ -19,6 +19,7 @@ const productsRouter = require('./routes/products');
 const ordersRouter = require('./routes/orders');
 const reviewsRouter = require('./routes/reviews');
 const opsRouter = require('./routes/ops');
+const seoPagesRouter = require('./routes/seoPages');
 const { initBot, stopBot } = require('./telegram');
 const { initEmailListener, stopEmailListener } = require('./services/emailListener');
 
@@ -126,6 +127,7 @@ async function start() {
 
     app.use('/api/orders', orderLimiter, ordersRouter);
     app.use('/internal', opsRouter);
+    app.use(seoPagesRouter);
 
     app.get('/health', (req, res) => {
       res.json({
