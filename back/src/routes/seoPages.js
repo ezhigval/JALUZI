@@ -118,6 +118,8 @@ function renderProductPage(req, product) {
 </html>`;
 }
 
+const categories = require('../data/catalogCategories.json');
+
 router.get('/sitemap.xml', (req, res) => {
   try {
     const site = (config.siteUrl || 'https://piter-jaluzi.ru').replace(/\/+$/, '');
@@ -127,7 +129,12 @@ router.get('/sitemap.xml', (req, res) => {
       { path: '/works-reviews', changefreq: 'weekly', priority: '0.8' },
       { path: '/thank-you', changefreq: 'monthly', priority: '0.3' },
       { path: '/politika-konfidentsialnosti', changefreq: 'yearly', priority: '0.2' },
-      { path: '/oferta', changefreq: 'yearly', priority: '0.2' }
+      { path: '/oferta', changefreq: 'yearly', priority: '0.2' },
+      ...categories.map((entry) => ({
+        path: `/catalog/${entry.slug}`,
+        changefreq: 'weekly',
+        priority: '0.85'
+      }))
     ];
 
     const indexable = products.getIndexable();

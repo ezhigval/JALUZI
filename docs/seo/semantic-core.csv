@@ -1,8 +1,21 @@
-# Semantic core — Питер-Жалюзи
-
-Шаблон для шага 5 v2. Колонки: query, frequency_exact, intent, cluster, target_url, status
-
 query,frequency_exact,intent,cluster,target_url,status
-!"жалюзи на заказ спб",,,commercial,main,,
-!"рулонные жалюзи спб",,,commercial,/catalog/rolikovye,,
-!"замер жалюзи бесплатно",,,commercial,/uslugi/zamer,,
+!"жалюзи на заказ спб",,commercial,main,/,planned
+!"жалюзи спб",,commercial,main,/,planned
+!"купить жалюзи спб",,commercial,main,/catalog,planned
+!"жалюзи цена спб",,commercial,price,/catalog,planned
+!"рулонные жалюзи спб",,commercial,rolikovye,/catalog/rolikovye,planned
+!"вертикальные жалюзи спб",,commercial,vertikalnye,/catalog/vertikalnye,planned
+!"горизонтальные жалюзи спб",,commercial,gorizontalnye,/catalog/gorizontalnye,planned
+!"жалюзи на пластиковые окна спб",,commercial,plastikovye,/catalog/plastikovye,planned
+!"жалюзи день ночь спб",,commercial,zebra,/catalog/zebra,planned
+!"замер жалюзи бесплатно",,commercial,zamer,/#measurement,planned
+!"установка жалюзи спб",,commercial,install,/#measurement,planned
+!"монтаж жалюзи спб",,commercial,install,/#measurement,planned
+!"ремонт жалюзи спб",,commercial,repair,/#repair,planned
+!"жалюзи санкт-петербург",,commercial,main,/,planned
+!"жалюзи на заказ санкт-петербург",,commercial,main,/,planned
+!"римские шторы спб",,commercial,zebra,/catalog/zebra,planned
+!"плиссе шторы спб",,commercial,rolikovye,/catalog/rolikovye,planned
+!"жалюзи для офиса спб",,commercial,vertikalnye,/catalog/vertikalnye,planned
+!"жалюзи недорого спб",,commercial,price,/catalog,planned
+!"заказать жалюзи с установкой",,transactional,main,/,planned

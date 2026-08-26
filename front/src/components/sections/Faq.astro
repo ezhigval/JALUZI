@@ -1,0 +1,85 @@
+---
+const faqItems = [
+  {
+    question: 'Сколько стоит замер жалюзи?',
+    answer: 'Замер бесплатный по Санкт-Петербургу и ближайшей Ленобласти. Мастер приедет с образцами и рассчитает стоимость на месте.'
+  },
+  {
+    question: 'За сколько дней изготавливают жалюзи?',
+    answer: 'Стандартный срок производства — от 3 рабочих дней после согласования размеров и модели.'
+  },
+  {
+    question: 'Какая гарантия на изделия и монтаж?',
+    answer: 'Гарантия 1 год на изделия и работу по монтажу при соблюдении рекомендаций по эксплуатации.'
+  },
+  {
+    question: 'Работаете ли вы по области?',
+    answer: 'Да, выезжаем по Санкт-Петербургу и ближайшим районам Ленинградской области — уточните адрес при заявке.'
+  },
+  {
+    question: 'Можно ли заказать жалюзи на пластиковые окна?',
+    answer: 'Да, подбираем крепления без сверления створки где возможно, или с аккуратным монтажом по согласованию.'
+  }
+];
+
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqItems.map((item) => ({
+    '@type': 'Question',
+    name: item.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: item.answer
+    }
+  }))
+};
+---
+<section id="faq" class="section">
+  <div class="container" style="max-width:760px;">
+    <h2 class="section-title">Частые вопросы</h2>
+    <div class="faq-list">
+      {faqItems.map((item) => (
+        <details class="faq-item">
+          <summary>{item.question}</summary>
+          <p>{item.answer}</p>
+        </details>
+      ))}
+    </div>
+  </div>
+  <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />
+</section>
+
+<style>
+  .faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .faq-item {
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 0.75rem;
+    padding: 0.25rem 1rem;
+    box-shadow: var(--shadow-md);
+  }
+
+  .faq-item summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--color-text);
+    padding: 0.75rem 0;
+    list-style: none;
+  }
+
+  .faq-item summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-item p {
+    margin: 0 0 1rem;
+    color: var(--color-text-muted);
+    line-height: 1.7;
+  }
+</style>

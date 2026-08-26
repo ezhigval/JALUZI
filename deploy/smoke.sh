@@ -44,6 +44,10 @@ check "privacy" curl -fsS "${BASE}/politika-konfidentsialnosti/" >/dev/null
 
 check "api-product-id-string" bash -c "curl -fsS '${BASE}/api/products' | grep -q '\"id\":\"'"
 
+for path in /catalog/rolikovye/ /catalog/vertikalnye/; do
+  check "page${path}" curl -fsS "${BASE}${path}" >/dev/null
+done
+
 if [[ -n "${WEBHOOK_PUBLIC}" ]]; then
   code="$(curl -sS -o /dev/null -w '%{http_code}' -X POST "${WEBHOOK_PUBLIC}" \
     -H 'Content-Type: application/json' -d '{}' --max-time 20 || echo 000)"

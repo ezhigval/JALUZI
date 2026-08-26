@@ -1,0 +1,59 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/layout/Header.astro';
+import Footer from '../../components/layout/Footer.astro';
+import OrderModal from '../../components/ui/OrderModal.astro';
+import StickyCta from '../../components/ui/StickyCta.astro';
+import categories from '../../data/catalogCategories.json';
+
+export function getStaticPaths() {
+  return categories.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry }
+  }));
+}
+
+const { entry } = Astro.props;
+const siteUrl = (import.meta.env.SITE_URL || 'https://piter-jaluzi.ru').replace(/\/+$/, '');
+const canonical = `/catalog/${entry.slug}`;
+
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Главная', item: `${siteUrl}/` },
+    { '@type': 'ListItem', position: 2, name: 'Каталог', item: `${siteUrl}/catalog` },
+    { '@type': 'ListItem', position: 3, name: entry.category, item: `${siteUrl}${canonical}` }
+  ]
+};
+---
+<BaseLayout title={entry.title} description={entry.description} canonical={canonical}>
+  <OrderModal />
+  <StickyCta />
+  <Header />
+  <section class="section">
+    <div class="container" style="max-width:900px;">
+      <p style="color:var(--color-text-muted);margin-bottom:0.5rem;">
+        <a href="/catalog" style="color:var(--color-primary);">Каталог</a> / {entry.category}
+      </p>
+      <h1 class="section-title" style="text-align:left;">{entry.category} жалюзи в Санкт-Петербурге</h1>
+      <p style="color:var(--color-text-muted);line-height:1.8;font-size:1.05rem;">{entry.intro}</p>
+      <p style="color:var(--color-text-muted);line-height:1.8;">
+        Бесплатный замер, производство от 3 дней, монтаж и гарантия. Посмотрите позиции в каталоге или оставьте заявку.
+      </p>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1.5rem;">
+        <a href={`/catalog?category=${encodeURIComponent(entry.category)}`} class="btn btn-primary">Смотреть в каталоге</a>
+        <button type="button" data-open-order-modal class="btn btn-outline">Вызвать замерщика</button>
+      </div>
+      <div id={`category-products-${entry.slug}`} class="product-grid" style="margin-top:2rem;" data-category={entry.category}>
+        <div class="section-placeholder">Загружаем товары…</div>
+      </div>
+    </div>
+  </section>
+  <Footer />
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
+  <script type="module" define:vars={{ slug: entry.slug, category: entry.category }}>
+    import { initCategoryLanding } from '/scripts/category-landing.js';
+    initCategoryLanding(slug, category);
+  </script>
+</BaseLayout>

@@ -118,6 +118,13 @@ export async function initCatalogPage() {
 
   if (!grid) return;
 
+  const params = new URLSearchParams(window.location.search);
+  const urlCategory = params.get('category');
+  if (urlCategory) {
+    currentCategory = urlCategory;
+    updateCategoryButtons(currentCategory);
+  }
+
   if (filters) {
     filters.querySelectorAll('.btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
