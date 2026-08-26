@@ -49,11 +49,14 @@ export function initProductModals() {
     }
   });
 
-  // Закрытие по Escape
+  // Закрытие по Escape (только реально открытые модалки)
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       document.querySelectorAll('.modal-overlay').forEach((modal) => {
-        if (modal instanceof HTMLElement && modal.style.display !== 'none') {
+        if (!(modal instanceof HTMLElement) || modal.id === 'order-modal') {
+          return;
+        }
+        if (modal.style.display === 'flex') {
           closeModal(modal);
         }
       });
