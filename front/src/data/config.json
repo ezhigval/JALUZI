@@ -20,6 +20,11 @@
     ],
     "priceRange": "₽₽"
   },
+  "messengers": {
+    "whatsapp": "79877955569",
+    "telegram": "https://t.me/piter_jaluzi",
+    "whatsappText": "Здравствуйте! Хочу заказать жалюзи."
+  },
   "stats": {
     "years": "20",
     "installations": "15000",

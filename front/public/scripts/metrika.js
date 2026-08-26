@@ -20,13 +20,32 @@ export function initMetrikaTracking() {
       return;
     }
 
-    const catalogLink = event.target.closest('a[href="/catalog"], a[href="/catalog/"]');
+    const waLink = event.target.closest('a[href*="wa.me"], a[href*="whatsapp.com"]');
+    if (waLink) {
+      reachGoal('click_whatsapp');
+      return;
+    }
+
+    const tgLink = event.target.closest('a[href*="t.me/"], a[href*="telegram.me/"]');
+    if (tgLink) {
+      reachGoal('click_telegram');
+      return;
+    }
+
+    const orderBtn = event.target.closest('[data-open-order-modal]');
+    if (orderBtn) {
+      reachGoal('open_order_modal');
+      return;
+    }
+
+    const catalogLink = event.target.closest('a[href="/catalog"], a[href="/catalog/"], a[href^="/catalog/"]');
     if (catalogLink) {
       reachGoal('open_catalog');
     }
   });
 
-  if (window.location.pathname === '/catalog' || window.location.pathname === '/catalog/') {
+  const path = window.location.pathname;
+  if (path === '/catalog' || path === '/catalog/' || path.startsWith('/catalog/')) {
     reachGoal('open_catalog');
   }
 }

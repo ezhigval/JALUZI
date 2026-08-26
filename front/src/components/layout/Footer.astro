@@ -1,5 +1,10 @@
 ---
 import config from '../../data/config.json';
+
+const waDigits = config.messengers?.whatsapp || config.company.phone.replace(/\D/g, '');
+const waText = encodeURIComponent(config.messengers?.whatsappText || 'Здравствуйте!');
+const waUrl = `https://wa.me/${waDigits}?text=${waText}`;
+const tgUrl = config.messengers?.telegram || 'https://t.me/';
 ---
 <footer style="background:var(--color-dark);color:white;padding:3rem 0;">
   <div class="container">
@@ -24,6 +29,8 @@ import config from '../../data/config.json';
         <div style="display:flex;flex-direction:column;gap:0.5rem;color:#94A3B8;">
           <span>{config.company.address}</span>
           <a href={`tel:${config.company.phone}`} style="color:var(--color-primary);text-decoration:none;">{config.company.phone}</a>
+          <a href={waUrl} style="color:#94A3B8;text-decoration:none;" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+          <a href={tgUrl} style="color:#94A3B8;text-decoration:none;" target="_blank" rel="noopener noreferrer">Telegram</a>
           <a href={`mailto:${config.company.email}`} style="color:#94A3B8;text-decoration:none;">{config.company.email}</a>
         </div>
       </div>
