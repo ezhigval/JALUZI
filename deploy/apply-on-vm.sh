@@ -69,7 +69,7 @@ setk('TELEGRAM_MODE', 'webhook')
 setk('TELEGRAM_WEBHOOK_PATH', '/telegram/webhook')
 setk('COMPOSE_PROJECT_NAME', 'piter-jaluzi')
 setk('AUTODEPLOY_REMOTE', 'jaluzi')
-setk('AUTODEPLOY_BRANCH', 'cursor/mailpit-autodeploy-781d')
+setk('AUTODEPLOY_BRANCH', 'main')
 
 out = []
 seen = set()

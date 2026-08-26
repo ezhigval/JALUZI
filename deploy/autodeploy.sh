@@ -84,8 +84,8 @@ fi
 
 # Never force a Hub pull for web; Caddy image on this VM is already local.
 # Rebuild api/worker from mirror.gcr.io; copy sources if that still fails.
-if docker compose --env-file .env up -d --build api worker mailpit >>"${LOG_FILE}" 2>&1; then
-  log "api/worker/mailpit up OK"
+if docker compose --env-file .env up -d --build api worker mailpit web >>"${LOG_FILE}" 2>&1; then
+  log "api/worker/mailpit/web up OK"
 else
   log "compose build failed — syncing source into running containers"
   docker compose --env-file .env up -d mailpit >>"${LOG_FILE}" 2>&1 || true
