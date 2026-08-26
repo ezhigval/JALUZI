@@ -2,19 +2,19 @@
 import config from '../../data/config.json';
 
 const features = [
-  { title: 'Бесплатный замер', desc: 'Приедем в удобное время' },
-  { title: `Гарантия ${config.stats.warranty}`, desc: 'На все виды изделий' },
-  { title: 'Производство 3 дня', desc: 'Собственный цех' },
-  { title: `На рынке ${config.stats.years} лет`, desc: `С ${config.company.since} года` },
+  { icon: '📏', title: 'Бесплатный замер', desc: 'Приедем в удобное время' },
+  { icon: '🛡️', title: `Гарантия ${config.stats.warranty}`, desc: 'На все виды изделий' },
+  { icon: '⚡', title: 'Производство 3 дня', desc: 'Собственный цех' },
+  { icon: '🏆', title: `На рынке ${config.stats.years} лет`, desc: `С ${config.company.since} года` },
 ];
 ---
 <section class="section features-section">
   <div class="container">
     <h2 class="section-title">Наши преимущества</h2>
     <div class="features-grid">
-      {features.map((feature, index) => (
+      {features.map((feature) => (
         <article class="feature-card">
-          <div class="feature-num" aria-hidden="true">{index + 1}</div>
+          <div class="feature-icon" aria-hidden="true">{feature.icon}</div>
           <h3>{feature.title}</h3>
           <p>{feature.desc}</p>
         </article>
@@ -43,18 +43,10 @@ const features = [
     border: 1px solid #E2E8F0;
   }
 
-  .feature-num {
-    width: 2.25rem;
-    height: 2.25rem;
+  .feature-icon {
+    font-size: 2.25rem;
+    line-height: 1;
     margin: 0 auto 1rem;
-    border-radius: 999px;
-    background: var(--color-primary);
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 1rem;
   }
 
   .feature-card h3 {
