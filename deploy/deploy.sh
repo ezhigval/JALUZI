@@ -17,4 +17,4 @@ fi
 
 docker compose --env-file .env up -d --build
 docker compose ps
-docker compose exec -T api node -e "fetch('http://127.0.0.1:3001/health').then(async (r)=>{const b=await r.text(); console.log(b); process.exit(r.ok?0:1)}).catch((e)=>{console.error(e); process.exit(1)})"
+./deploy/smoke.sh

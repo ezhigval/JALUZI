@@ -110,4 +110,11 @@ fi
 docker compose --env-file .env up -d --no-build web >>"${LOG_FILE}" 2>&1 || true
 
 docker compose --env-file .env ps >>"${LOG_FILE}" 2>&1 || true
+
+if ./deploy/smoke.sh >>"${LOG_FILE}" 2>&1; then
+  log "smoke OK"
+else
+  log "smoke FAILED — see log above"
+fi
+
 log "done"
