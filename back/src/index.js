@@ -87,7 +87,8 @@ async function start() {
     if (useTelegramWebhook && (role === 'api' || role === 'all')) {
       const botApi = await initBot({ mode: 'full' });
       if (botApi?.webhookMiddleware && botApi.webhookPath) {
-        app.use(botApi.webhookPath, botApi.webhookMiddleware);
+        // Telegraf webhook middleware matches the full path internally.
+        app.use(botApi.webhookMiddleware);
         console.log('📨 Mounted Telegram webhook at ' + botApi.webhookPath);
       }
     }
