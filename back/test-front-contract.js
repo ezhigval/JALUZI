@@ -42,10 +42,7 @@ function assertAllowedCors(response, path) {
 }
 
 function assertProduct(product, index) {
-  assert(
-    (typeof product.id === 'number' || typeof product.id === 'string') && String(product.id),
-    `products[${index}].id must be number|string`
-  );
+  assert(typeof product.id === 'string' && product.id, `products[${index}].id must be string`);
   assert(typeof product.name === 'string' && product.name, `products[${index}].name must be string`);
   assert(typeof product.category === 'string' && product.category, `products[${index}].category must be string`);
   assert(typeof product.price === 'number' && Number.isFinite(product.price), `products[${index}].price must be number`);

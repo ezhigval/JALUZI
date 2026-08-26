@@ -91,7 +91,7 @@ function main() {
       name: String(item.name).trim().slice(0, 200),
       category: mapCategory(item.category),
       price: 1500,
-      description: item.linkFull ? String(item.linkFull).slice(0, 500) : '',
+      description: '',
       image: copyImage(item),
       in_stock: 1,
       source: SOURCE_PARSER,

@@ -10,10 +10,13 @@ const {
 } = require('../utils/sanitize');
 const { resolveAssetUrl } = require('../utils/http');
 
+const { productPath, publicProductDescription } = require('../utils/productMeta');
+
 function serializeProduct(req, product) {
-  const { productPath } = require('../utils/productMeta');
   return {
     ...product,
+    id: String(product.id),
+    description: publicProductDescription(product),
     image: resolveAssetUrl(req, product.image),
     path: productPath(product)
   };

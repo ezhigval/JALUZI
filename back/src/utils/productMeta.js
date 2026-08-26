@@ -61,6 +61,29 @@ function productPath(product) {
   return `/catalog/p/${encodeURIComponent(key)}`;
 }
 
+function isInterskladUrl(value) {
+  const text = String(value || '').trim();
+  return /^https?:\/\//i.test(text) && /intersklad/i.test(text);
+}
+
+function isUrlOnlyDescription(value) {
+  const text = String(value || '').trim();
+  return /^https?:\/\//i.test(text);
+}
+
+function parserDescriptionFallback(product) {
+  const category = String(product?.category || 'Жалюзи').trim();
+  return `${category} на заказ в Санкт-Петербурге. Бесплатный замер, профессиональный монтаж, гарантия 1 год.`;
+}
+
+function publicProductDescription(product) {
+  const raw = String(product?.description || '').trim();
+  if (!raw || isInterskladUrl(raw) || (isParserSource(product?.source) && isUrlOnlyDescription(raw))) {
+    return parserDescriptionFallback(product);
+  }
+  return raw;
+}
+
 module.exports = {
   SOURCE_PARSER,
   SOURCE_MANUAL,
@@ -70,5 +93,9 @@ module.exports = {
   looksLikeParsedProduct,
   buildProductSlug,
   createManualProductId,
-  productPath
+  productPath,
+  isInterskladUrl,
+  isUrlOnlyDescription,
+  parserDescriptionFallback,
+  publicProductDescription
 };

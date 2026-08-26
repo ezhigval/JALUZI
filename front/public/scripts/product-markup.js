@@ -1,11 +1,26 @@
 import { escapeHtml } from '/scripts/api.js';
 import { IMG_PLACEHOLDER_SRC } from '/scripts/asset-loader.js';
 
+function isUrlDescription(value) {
+  const text = String(value || '').trim();
+  return /^https?:\/\//i.test(text);
+}
+
+function productDescription(product) {
+  const raw = String(product.description || '').trim();
+  const source = String(product.source || 'manual');
+  if (!raw || isUrlDescription(raw) || (source === 'parser' && isUrlDescription(raw))) {
+    const category = escapeHtml(product.category || 'Жалюзи');
+    return `${category} на заказ в Санкт-Петербурге. Бесплатный замер, профессиональный монтаж, гарантия 1 год.`;
+  }
+  return escapeHtml(raw);
+}
+
 export function renderProductEntry(product) {
   const id = escapeHtml(String(product.id));
   const name = escapeHtml(product.name);
   const category = escapeHtml(product.category);
-  const description = escapeHtml(product.description || 'Подробное описание скоро появится.');
+  const description = productDescription(product);
   const image = escapeHtml(product.image);
   const price = escapeHtml(product.price);
   const source = escapeHtml(product.source || 'manual');

@@ -70,20 +70,46 @@ MX / SPF / DKIM не трогать.
 
 ## 3. Cloudflare Worker для Telegram + webhook
 
+Telegram **не может** надёжно достучаться до IP Yandex Cloud VM (webhook timeout). Решение — двухсторонний CF Worker:
+
+| Направление | Путь | Куда идёт |
+| --- | --- | --- |
+| **Inbound** (Telegram → сайт) | `TELEGRAM_WEBHOOK_PUBLIC_URL` | Worker `/telegram/webhook` → Caddy → `api` |
+| **Outbound** (VM → Telegram API) | `TELEGRAM_API_ROOT` | Worker `/bot<token>/…` → `api.telegram.org` |
+
 ```bash
 cd deploy/cloudflare
 npx wrangler deploy
 ```
 
-В `.env` на VM:
+### Переменные на VM (`.env`)
 
 ```env
+# Исходящие вызовы Bot API через Worker
 TELEGRAM_API_ROOT=https://piter-jaluzi-tg-proxy.chemical-red.workers.dev
+
+# Режим webhook (prod) | polling (локальный fallback)
 TELEGRAM_MODE=webhook
+
+# Путь на api-контейнере (Caddy проксирует сюда)
 TELEGRAM_WEBHOOK_PATH=/telegram/webhook
+
+# Публичный URL для setWebhook — Worker ingress, НЕ IP VM
+TELEGRAM_WEBHOOK_PUBLIC_URL=https://piter-jaluzi-tg-proxy.chemical-red.workers.dev/telegram/webhook
+
+# Секрет webhook (openssl rand -hex 24) — в заголовке X-Telegram-Bot-Api-Secret-Token
 TELEGRAM_WEBHOOK_SECRET=<openssl rand -hex 24>
+
+TELEGRAM_BOT_TOKEN=<от @BotFather>
 SITE_URL=https://piter-jaluzi.ru
 ```
+
+При старте `worker` контейнера бот вызывает `setWebhook` с URL из `TELEGRAM_WEBHOOK_PUBLIC_URL` (если задан), иначе fallback на `{SITE_URL}{TELEGRAM_WEBHOOK_PATH}`.
+
+Worker (`deploy/cloudflare/telegram-proxy-worker.js`):
+
+- `POST /telegram/webhook` → прокси на `WEBHOOK_TARGET` (по умолчанию `https://piter-jaluzi.ru/telegram/webhook`)
+- `/bot<token>/…` → `api.telegram.org`
 
 Актуальный Worker: аккаунт Cloudflare **Chemical Red**, имя `piter-jaluzi-tg-proxy`  
 (`deploy/cloudflare/wrangler.toml` уже содержит `account_id`).
@@ -93,8 +119,22 @@ cd deploy/cloudflare
 CLOUDFLARE_API_TOKEN=… npx wrangler deploy
 ```
 
-Caddy отдаёт `POST /telegram/webhook` на `api`. Бот вызывает `setWebhook` через `TELEGRAM_API_ROOT`.  
-Пока Worker/DNS не готовы — временно `TELEGRAM_MODE=polling` (с RU VM часто не работает без прокси).
+Caddy отдаёт `POST /telegram/webhook` на `api`. Пока Worker/DNS не готовы — временно `TELEGRAM_MODE=polling` (с RU VM часто не работает без прокси).
+
+### Проверка webhook
+
+```bash
+# Health сайта
+curl -fsS https://piter-jaluzi.ru/health
+
+# Worker ingress (ожидается прокси-ответ от api, не timeout)
+curl -sS -o /dev/null -w "%{http_code}\n" \
+  -X POST "https://piter-jaluzi-tg-proxy.chemical-red.workers.dev/telegram/webhook" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+Операционные сценарии: [docs/runbook.md](./docs/runbook.md).
 
 ## 4. SSL (Let's Encrypt через Caddy)
 

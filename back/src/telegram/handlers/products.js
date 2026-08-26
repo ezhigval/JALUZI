@@ -191,7 +191,7 @@ async function handleAdd(bot, msg, state) {
 // Выбор товара для редактирования
 async function handleEditSelect(bot, msg, state) {
   const chatId = msg.chat.id;
-  const id = parseInt(msg.text);
+  const id = String(msg.text || '').trim();
   const product = db.getProductById(id);
 
   if (!product) { bot.sendMessage(chatId, '❌ Не найден'); return; }
@@ -269,7 +269,7 @@ async function handleEdit(bot, msg, state) {
 // Удаление
 async function handleDelete(bot, msg, state) {
   const chatId = msg.chat.id;
-  const id = parseInt(msg.text);
+  const id = String(msg.text || '').trim();
   const product = db.getProductById(id);
 
   if (!product) { bot.sendMessage(chatId, '❌ Не найден'); return; }

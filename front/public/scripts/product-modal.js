@@ -18,8 +18,7 @@ export function initProductModals() {
     if (card && !e.target.closest('.modal-content')) {
       const productId = card.getAttribute('data-product-id');
 
-      // ✅ ИСПРАВЛЕНИЕ: ищем модалку относительно карточки, а не во всём документе
-      // Вариант 1: модалка — следующий сосед карточки (как в renderProductEntry)
+      // Ищем модалку относительно карточки (следующий sibling в renderProductEntry)
       const modal = card.nextElementSibling;
 
       // Проверяем, что это действительно нужная модалка

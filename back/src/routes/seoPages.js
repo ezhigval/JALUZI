@@ -3,7 +3,7 @@ const router = express.Router();
 const config = require('../config');
 const products = require('../services/products');
 const { resolveAssetUrl } = require('../utils/http');
-const { isSeoIndexable, productPath } = require('../utils/productMeta');
+const { isSeoIndexable, productPath, publicProductDescription } = require('../utils/productMeta');
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -20,11 +20,7 @@ function renderProductPage(req, product) {
   const canonical = `${site}${path}`;
   const image = resolveAssetUrl(req, product.image);
   const title = `${product.name} | ${product.category} | Питер-Жалюзи`;
-  const description =
-    (product.description && !/intersklad/i.test(product.description)
-      ? product.description
-      : `${product.name} — ${product.category} жалюзи на заказ в Санкт-Петербурге. Бесплатный замер, гарантия 1 год.`)
-      .slice(0, 180);
+  const description = publicProductDescription(product).slice(0, 180);
 
   const jsonLd = {
     '@context': 'https://schema.org',

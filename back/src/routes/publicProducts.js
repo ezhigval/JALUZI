@@ -2,11 +2,13 @@ const express = require('express');
 const router = express.Router();
 const products = require('../services/products');
 const { resolveAssetUrl } = require('../utils/http');
-const { productPath } = require('../utils/productMeta');
+const { productPath, publicProductDescription } = require('../utils/productMeta');
 
 function serializeProduct(req, product) {
   return {
     ...product,
+    id: String(product.id),
+    description: publicProductDescription(product),
     image: resolveAssetUrl(req, product.image),
     path: productPath(product)
   };
