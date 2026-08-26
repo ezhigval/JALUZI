@@ -76,11 +76,29 @@ cd /opt/piter-jaluzi
 
 ```bash
 docker compose stop api worker
-cp /var/data/jaluzi/data/db.sqlite /var/data/jaluzi/data/db.sqlite.bak
-tar -xzf backup-YYYYMMDD.tar.gz -C /var/data/jaluzi/
+./deploy/restore.sh /opt/backups/piter-jaluzi-YYYYMMDDTHHMMSSZ.tar.gz
 docker compose up -d api worker
 curl -fsS https://piter-jaluzi.ru/health
+./deploy/smoke.sh
 ```
+
+---
+
+## CI упал на main
+
+1. Открыть [Actions](https://github.com/ezhigval/JALUZI/actions) → последний workflow `ci`.
+2. Job `check` — синтаксис Astro/Node, build фронта.
+3. Job `contract` — API contract, smoke, telegram bot logic (в Docker).
+4. Локально повторить: `docker compose up -d api && docker compose exec -T api node test-front-contract.js`
+
+---
+
+## Health = degraded (db: error)
+
+1. `docker compose logs api --tail=50` — ошибки SQLite.
+2. Проверить volume: `docker volume inspect piter-jaluzi_jaluzi-data`
+3. Права на `/var/data/jaluzi/data` внутри контейнера.
+4. Restore из последнего бэкапа (см. выше).
 
 ---
 

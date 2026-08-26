@@ -38,6 +38,12 @@ check "api-products" bash -c "curl -fsS '${BASE}/api/products' | grep -q '\"succ
 
 check "homepage" curl -fsS "${BASE}/" >/dev/null
 
+check "thank-you" curl -fsS "${BASE}/thank-you/" >/dev/null
+
+check "privacy" curl -fsS "${BASE}/politika-konfidentsialnosti/" >/dev/null
+
+check "api-product-id-string" bash -c "curl -fsS '${BASE}/api/products' | grep -q '\"id\":\"'"
+
 if [[ -n "${WEBHOOK_PUBLIC}" ]]; then
   code="$(curl -sS -o /dev/null -w '%{http_code}' -X POST "${WEBHOOK_PUBLIC}" \
     -H 'Content-Type: application/json' -d '{}' --max-time 20 || echo 000)"

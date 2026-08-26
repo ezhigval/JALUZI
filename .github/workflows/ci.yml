@@ -43,3 +43,34 @@ jobs:
           cp .env.example .env
           docker compose -f docker-compose.yml config --quiet
           docker compose -f docker-compose.dev.yml config --quiet
+
+  contract:
+    runs-on: ubuntu-latest
+    needs: check
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start API stack for contract tests
+        run: |
+          cp .env.example .env
+          docker compose up -d --build mailpit api
+          for i in $(seq 1 30); do
+            if docker compose exec -T api node -e "fetch('http://127.0.0.1:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"; then
+              echo "API ready"
+              break
+            fi
+            sleep 2
+          done
+
+      - name: Front/API contract tests
+        run: |
+          docker compose exec -T \
+            -e API_URL=http://127.0.0.1:3001 \
+            -e FRONT_ORIGIN=http://localhost:4321 \
+            api node test-front-contract.js
+
+      - name: Backend smoke test
+        run: docker compose exec -T api node test-backend.js
+
+      - name: Telegram bot logic test
+        run: docker compose exec -T api node test-telegram-bot.js
