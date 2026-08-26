@@ -7,7 +7,7 @@
 | Версия | Статус | Суть |
 | --- | --- | --- |
 | **v1** | ✅ Закрыт (прод) | Рабочий сайт на Yandex Cloud: каталог, заявки, Telegram admin, SEO-база, Метрика, CF-прокси |
-| **v2** | 🔄 В работе | Качество кода, анти-AI следы, скорость, конверсия, ops, надёжность, **SEO-продвижение (Wordstat, семантика, карты, реклама)** |
+| **v2** | ✅ Код закрыт; manual ops осталось | Качество кода, анти-AI следы, скорость, конверсия, ops, надёжность, **SEO-продвижение (Wordstat, семантика, карты, реклама)** — PR1–PR12 на `main` (`21c4b04`) |
 | **v3** | Идея | SSR каталог, CRM, A/B ecommerce, мульти-регион |
 
 Подробный план v2: [docs/V2.md](./docs/V2.md).
@@ -66,18 +66,32 @@ SEO / аналитика
 4. **PR4 conversion** — thank-you, Metrika, CTA, price stub
 5. **PR5 ops** — honeypot, backup, health, bot healthcheck
 6. **PR6 telegram** — `.env.example`, autodeploy smoke
+7. **PR7 visual** — visual cleanup, legal pages, homepage reviews
+8. **PR8 images** — WebP hero, parser resize, optimize script
+9. **PR9 deeplinks** — WhatsApp/Telegram deep-links, Metrika docs
+10. **PR10 smtp-backup** — REG.RU SMTP docs, restore.sh, cron examples
+11. **PR11 CI** — contract job, smoke checks, runbook CI/degraded
+12. **PR12 SEO** — category landings, FAQ schema, semantic-core.csv
 
-Детали и критерии приёмки — в [docs/V2.md](./docs/V2.md).
+Детали, чек-листы и **manual ops** — в [docs/V2.md](./docs/V2.md).
 
 ---
 
 ## v2 — прогресс
 
-- [ ] PR1: полный бэклог в документации
-- [ ] PR2: шаг 1 quick wins
-- [ ] PR3: шаг 2 производительность
-- [ ] PR4: шаг 3 конверсия
-- [ ] PR5: шаг 4 операционка
-- [ ] PR6: Telegram + autodeploy
-- [ ] Шаг 4.5 надёжность (частично в PR5–PR6 + CI)
-- [ ] Шаг 5 SEO (контент и внешние площадки — после кодовых PR)
+**Статус:** код закрыт (PR1–PR12 → `main`, `21c4b04`); manual ops — см. [docs/V2.md § Manual / ops remaining](./docs/V2.md#manual--ops-remaining).
+
+- [x] PR1: полный бэклог в документации
+- [x] PR2: шаг 1 quick wins
+- [x] PR3: шаг 2 производительность
+- [x] PR4: шаг 3 конверсия
+- [x] PR5: шаг 4 операционка (код)
+- [x] PR6: Telegram + autodeploy
+- [x] PR7: визуал, legal, отзывы
+- [x] PR8: WebP и оптимизация изображений
+- [x] PR9: deep-links и Metrika docs
+- [x] PR10: SMTP docs, backup/restore scripts
+- [x] PR11: CI contract + надёжность
+- [x] PR12: SEO foundations (category landings, FAQ, semantic seed)
+- [x] Шаг 4.5 надёжность (health, CI gates, dev-compose)
+- [ ] Manual ops: SMTP на VM, Wordstat, карты, Metrika UI, cron, фото, гео-контент
