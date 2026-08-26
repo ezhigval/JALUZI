@@ -1,9 +1,9 @@
 ---
 import config from '../../data/config.json';
 
-const pricing = config.pricing?.fromPerSqm || {};
+const pricing = config.pricing?.fromPerSqm ?? {};
 const categories = Object.keys(pricing).filter((key) => key !== 'default');
-const defaultPrice = pricing.default || 890;
+const defaultPrice = Number(pricing['default']) || 890;
 ---
 <section id="prices" class="section">
   <div class="container" style="max-width:720px;">
@@ -28,7 +28,7 @@ const defaultPrice = pricing.default || 890;
   </div>
 </section>
 
-<script define:vars={{ pricing, defaultPrice }}>
+<script is:inline define:vars={{ pricing, defaultPrice }}>
   const select = document.getElementById('price-category');
   const result = document.getElementById('price-result');
 
