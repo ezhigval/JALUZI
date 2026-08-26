@@ -246,7 +246,16 @@ EMAIL_PASS=…
 `deploy/api.Dockerfile` берёт Node с `mirror.gcr.io`.  
 Mailpit — с `ghcr.io/axllent/mailpit` (Hub с VM часто timeout).
 
-## 10. Версии и план
+## 11. Оптимизация изображений (шаг 2 v2)
+
+Hero/about лежат в `front/public/` (`background.jpg`, `about.jpeg`) + WebP-версии для `<picture>`.
+
+```bash
+./deploy/optimize-images.sh   # ffmpeg → background.webp, about.webp
+```
+
+При импорте parser-картинок `import-parsed-catalog.js` уменьшает ширину до 800px (ffmpeg, если доступен на хосте/в контейнере).
+
 
 - **v1** (текущий прод) — рабочий контур; чеклист в [ROADMAP.md](./ROADMAP.md)
 - **v2** — качество кода, скорость, конверсия, боевая почта; старт: [docs/V2.md](./docs/V2.md) шаг 1
