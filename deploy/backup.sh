@@ -31,6 +31,7 @@ if [[ -d "${UPLOADS_DIR}" ]]; then
 fi
 
 tar -czf "${ARCHIVE}" -C "${TMP}" data uploads
+echo "${TIMESTAMP} archive=${ARCHIVE}" >> "${BACKUP_DIR}/backup.log"
 echo "backup: ${ARCHIVE} ($(du -h "${ARCHIVE}" | awk '{print $1}'))"
 
 # Keep last 14 daily-ish backups

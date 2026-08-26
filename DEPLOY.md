@@ -228,17 +228,52 @@ sudo ./deploy/install-cloudflared.sh
 
 ## 8. Почта
 
-По умолчанию исходящие заявки → **Mailpit** (`EMAIL_HOST=mailpit`, порт `1025`).  
-IMAP listener выключен (`INCOMING_EMAIL_HOST=` пустой), пока REG.RU пароль не починен.
+### Dev / staging (по умолчанию)
 
-Вернуть REG.RU SMTP:
+Исходящие заявки → **Mailpit** (`EMAIL_HOST=mailpit`, порт `1025`).  
+IMAP listener выключен (`INCOMING_EMAIL_HOST=` пустой).
+
+Mailpit UI с ноутбука: `ssh -L 8025:127.0.0.1:8025 smailikin70@93.77.163.4` → http://127.0.0.1:8025
+
+### Prod: REG.RU SMTP
+
+1. В панели REG.RU создайте ящик `info@piter-jaluzi.ru` (или используйте существующий).
+2. На VM в `/opt/piter-jaluzi/.env` замените блок `EMAIL_*`:
 
 ```env
 EMAIL_HOST=mail.hosting.reg.ru
 EMAIL_PORT=465
 EMAIL_SECURE=true
 EMAIL_USER=info@piter-jaluzi.ru
-EMAIL_PASS=…
+EMAIL_PASS=<пароль ящика из REG.RU>
+```
+
+3. Перезапуск: `docker compose up -d api worker`
+4. Тест: отправьте заявку с сайта, проверьте входящие на `info@piter-jaluzi.ru`.
+
+Опционально IMAP (входящие на сайт):
+
+```env
+INCOMING_EMAIL_HOST=mail.hosting.reg.ru
+INCOMING_EMAIL_PORT=993
+INCOMING_EMAIL_USER=info@piter-jaluzi.ru
+INCOMING_EMAIL_PASS=<тот же пароль>
+```
+
+### Бэкап и восстановление
+
+```bash
+# Ежедневный cron (03:00 UTC)
+0 3 * * * cd /opt/piter-jaluzi && ./deploy/backup.sh /opt/backups >> /opt/backups/backup.log 2>&1
+
+# Healthcheck бота (каждые 10 мин)
+*/10 * * * * cd /opt/piter-jaluzi && ./deploy/bot-healthcheck.sh >> /opt/backups/healthcheck.log 2>&1
+
+# Restore (остановить api/worker, затем)
+docker compose stop api worker
+./deploy/restore.sh /opt/backups/piter-jaluzi-YYYYMMDDTHHMMSSZ.tar.gz
+docker compose up -d api worker
+curl -fsS https://piter-jaluzi.ru/health
 ```
 
 ## 9. Образы без Docker Hub
@@ -256,6 +291,7 @@ Hero/about лежат в `front/public/` (`background.jpg`, `about.jpeg`) + WebP
 
 При импорте parser-картинок `import-parsed-catalog.js` уменьшает ширину до 800px (ffmpeg, если доступен на хосте/в контейнере).
 
+## 10. Версии и план
 
 - **v1** (текущий прод) — рабочий контур; чеклист в [ROADMAP.md](./ROADMAP.md)
-- **v2** — качество кода, скорость, конверсия, боевая почта; старт: [docs/V2.md](./docs/V2.md) шаг 1
+- **v2** — качество кода, скорость, конверсия, боевая почта; план: [docs/V2.md](./docs/V2.md)
