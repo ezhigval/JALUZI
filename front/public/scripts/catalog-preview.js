@@ -1,6 +1,6 @@
 import { fetchJson } from '/scripts/api.js';
 import { hydrateAssetImages } from '/scripts/asset-loader.js';
-import { renderProductEntry } from '/scripts/product-markup.js';
+import { renderProductEntry, relocateProductModals } from '/scripts/product-markup.js';
 
 export async function initCatalogPreview() {
   const grid = document.getElementById('catalog-preview-grid');
@@ -20,6 +20,7 @@ export async function initCatalogPreview() {
     }
 
     grid.innerHTML = products.map(renderProductEntry).join('');
+    relocateProductModals(grid);
     await hydrateAssetImages(grid);
   } catch (error) {
     console.error('Catalog preview error:', error);

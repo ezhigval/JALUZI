@@ -25,9 +25,33 @@ function updateProductCalculator(calcEl) {
   resultEl.textContent = `${formatRub(total)} ₽`;
 }
 
+function findProductModal(card) {
+  const productId = card.getAttribute('data-product-id');
+  if (!productId) return null;
+
+  const sibling = card.nextElementSibling;
+  if (
+    sibling instanceof HTMLElement &&
+    sibling.classList.contains('modal-overlay') &&
+    sibling.dataset.modalProductId === productId
+  ) {
+    return sibling;
+  }
+
+  return document.querySelector(`.modal-overlay[data-modal-product-id="${productId}"]`);
+}
+
 function initCalculatorInModal(modal) {
   const calc = modal.querySelector('.product-price-calculator');
-  if (calc) updateProductCalculator(calc);
+  if (!calc) return;
+
+  updateProductCalculator(calc);
+
+  const content = modal.querySelector('.modal-content');
+  if (content instanceof HTMLElement) {
+    content.scrollTop = 0;
+    calc.scrollIntoView({ block: 'nearest', behavior: 'instant' in window ? 'instant' : 'auto' });
+  }
 }
 
 export function initProductModals() {
@@ -51,21 +75,11 @@ export function initProductModals() {
 
     // Открываем модалку только если клик по карточке и не по контенту самой модалки
     if (card && !e.target.closest('.modal-content')) {
-      const productId = card.getAttribute('data-product-id');
-
-      // Ищем модалку относительно карточки (следующий sibling в renderProductEntry)
-      const modal = card.nextElementSibling;
-
-      // Проверяем, что это действительно нужная модалка
-      if (modal &&
-          modal.classList.contains('modal-overlay') &&
-          modal.dataset.modalProductId === productId) {
+      const modal = findProductModal(card);
+      if (modal instanceof HTMLElement) {
         openModal(modal);
         initCalculatorInModal(modal);
       }
-      // Вариант 2 (более надёжный, если структура изменится):
-      // const modal = card.parentElement?.querySelector(`.modal-overlay[data-modal-product-id="${productId}"]`);
-      // if (modal instanceof HTMLElement) { openModal(modal); }
     }
 
     // Закрытие по кнопке ×

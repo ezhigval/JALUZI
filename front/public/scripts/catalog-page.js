@@ -1,6 +1,6 @@
 import { fetchJson } from '/scripts/api.js';
 import { hydrateAssetImages } from '/scripts/asset-loader.js';
-import { renderProductEntry } from '/scripts/product-markup.js';
+import { renderProductEntry, relocateProductModals } from '/scripts/product-markup.js';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -62,6 +62,7 @@ function renderProducts() {
   }
 
   grid.innerHTML = pageProducts.map(renderProductEntry).join('');
+  relocateProductModals(grid);
   hydrateAssetImages(grid);
 }
 

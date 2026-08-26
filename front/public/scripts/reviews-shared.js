@@ -18,7 +18,9 @@ export function renderReviewCards(reviews) {
     const blindsType = escapeHtml(review.blindsType);
     const comment = escapeHtml(review.comment);
     const rating = Math.max(1, Math.min(5, Number(review.rating) || 5));
-    const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+    const stars = Array.from({ length: 5 }, (_, index) => `
+      <span data-active="${index < rating}">★</span>
+    `).join('');
     const date = formatReviewDate(review.created_at);
 
     return `
@@ -30,9 +32,9 @@ export function renderReviewCards(reviews) {
             <div class="review-card-type">${blindsType}</div>
             ${date ? `<div class="review-card-date">${date}</div>` : ''}
           </div>
+          <div class="review-card-stars" aria-label="Оценка ${rating} из 5">${stars}</div>
         </div>
-        <div class="review-card-rating" aria-label="Оценка ${rating} из 5">${stars}</div>
-        <p class="review-card-comment">${comment}</p>
+        <p class="review-card-text">${comment}</p>
       </article>
     `;
   }).join('');

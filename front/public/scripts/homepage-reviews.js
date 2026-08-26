@@ -21,7 +21,9 @@ export async function initHomepageReviews() {
     }
 
     state.hidden = true;
+    state.textContent = '';
     grid.hidden = false;
+    grid.removeAttribute('hidden');
     grid.innerHTML = renderReviewCards(reviews);
     injectReviewsJsonLd(data);
   } catch (error) {

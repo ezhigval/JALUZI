@@ -256,6 +256,46 @@
 }
 
 /* Product modal price calculator */
+.product-modal-img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  display: block;
+}
+
+.product-modal-body {
+  padding: 1.5rem;
+}
+
+.product-modal-category {
+  color: var(--color-primary);
+  font-size: 0.8rem;
+}
+
+.product-modal-title {
+  font-size: 1.5rem;
+  margin: 0.5rem 0;
+}
+
+.product-modal-price {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--color-primary);
+  margin: 0 0 1rem;
+}
+
+.product-modal-description {
+  color: var(--color-text-muted);
+  margin: 1rem 0 0;
+  line-height: 1.7;
+  font-size: 0.95rem;
+}
+
+.product-modal-order-btn {
+  width: 100%;
+  margin-top: 1rem;
+}
+
 .product-price-calculator {
   margin: 1.25rem 0 0;
   padding: 1rem;
@@ -503,6 +543,7 @@
 @media (max-width: 768px) {
   .section-title { font-size: 1.5rem; }
   .modal-content { max-height: min(95dvh, 100%); }
+  .product-modal-img { height: 180px; }
   .product-calc-fields { grid-template-columns: 1fr; }
   .work-slide img { height: 250px; }
   .slider-nav-btn {
