@@ -1,0 +1,8 @@
+# Semantic core — Питер-Жалюзи
+
+Шаблон для шага 5 v2. Колонки: query, frequency_exact, intent, cluster, target_url, status
+
+query,frequency_exact,intent,cluster,target_url,status
+!"жалюзи на заказ спб",,,commercial,main,,
+!"рулонные жалюзи спб",,,commercial,/catalog/rolikovye,,
+!"замер жалюзи бесплатно",,,commercial,/uslugi/zamer,,
