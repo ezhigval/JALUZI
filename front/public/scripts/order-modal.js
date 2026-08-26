@@ -69,5 +69,9 @@ export function initOrderModal() {
     });
   }
 
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') window.closeOrderModal(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && orderModal?.style.display === 'flex') {
+      window.closeOrderModal();
+    }
+  });
 }
