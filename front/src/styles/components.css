@@ -503,6 +503,7 @@
 @media (max-width: 768px) {
   .section-title { font-size: 1.5rem; }
   .modal-content { max-height: min(95dvh, 100%); }
+  .product-calc-fields { grid-template-columns: 1fr; }
   .work-slide img { height: 250px; }
   .slider-nav-btn {
     width: 44px;
