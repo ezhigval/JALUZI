@@ -458,12 +458,19 @@
 
 @media (max-width: 768px) {
   .section-title { font-size: 1.5rem; }
-  .modal-content { max-height: 95vh; }
+  .modal-content { max-height: min(95dvh, 100%); }
   .work-slide img { height: 250px; }
   .slider-nav-btn {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     font-size: 1.25rem;
   }
   .reviews-grid { grid-template-columns: 1fr; }
+  .header-btn { min-height: 44px; }
+}
+
+.page-btn {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.65rem 0.9rem;
 }
