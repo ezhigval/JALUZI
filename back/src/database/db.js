@@ -20,9 +20,12 @@ function normalizeProductRow(row) {
 }
 
 // === PRODUCTS ===
+const CATALOG_ORDER_SQL =
+  'SELECT * FROM products ORDER BY CASE WHEN source = ? THEN 1 ELSE 0 END, created_at DESC, id';
+
 module.exports.getAllProducts = () => {
   const db = getDb();
-  return db.prepare('SELECT * FROM products ORDER BY created_at DESC, id').all().map(normalizeProductRow);
+  return db.prepare(CATALOG_ORDER_SQL).all(SOURCE_PARSER).map(normalizeProductRow);
 };
 
 module.exports.getIndexableProducts = () => {
