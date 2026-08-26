@@ -131,13 +131,26 @@ async function start() {
     app.use(seoPagesRouter);
 
     app.get('/health', (req, res) => {
-      res.json({
-        status: 'ok',
+      let dbOk = false;
+      try {
+        const { getDb } = require('./database/initDb');
+        getDb().prepare('SELECT 1 AS ok').get();
+        dbOk = true;
+      } catch {
+        dbOk = false;
+      }
+
+      const payload = {
+        status: dbOk ? 'ok' : 'degraded',
         role,
         telegramMode: config.telegramMode,
+        telegramWebhookPublicUrl: config.telegramWebhookPublicUrl || null,
+        db: dbOk ? 'ok' : 'error',
         timestamp: new Date().toISOString(),
         uptime: process.uptime()
-      });
+      };
+
+      res.status(dbOk ? 200 : 503).json(payload);
     });
 
     app.get('/api', (req, res) => {

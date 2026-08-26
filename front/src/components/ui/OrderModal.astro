@@ -23,6 +23,7 @@ import config from '../../data/config.json';
       </select>
       <label class="sr-only" for="order-message">Комментарий</label>
       <textarea id="order-message" name="message" rows="3" placeholder="Комментарий" class="modal-textarea"></textarea>
+      <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="order-honeypot" />
       <button type="submit" class="btn btn-primary">Отправить заявку</button>
       <p id="order-form-status" class="form-status" aria-live="polite"></p>
     </form>
@@ -32,3 +33,14 @@ import config from '../../data/config.json';
     </div>
   </div>
 </div>
+
+<style>
+  .order-honeypot {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+</style>

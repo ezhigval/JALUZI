@@ -63,7 +63,14 @@ tail -50 /opt/piter-jaluzi/deploy/logs/autodeploy.log
 
 ## Бэкап и восстановление
 
-Скрипт бэкапа (v2 PR5): `deploy/backup.sh` — SQLite + uploads в архив.
+Скрипт бэкапа: `deploy/backup.sh` — SQLite + uploads в `deploy/backups/` (или путь аргументом).
+
+```bash
+cd /opt/piter-jaluzi
+./deploy/backup.sh /opt/backups
+```
+
+Проверка бота и webhook: `deploy/bot-healthcheck.sh` (cron каждые 5–15 мин).
 
 **Restore (на тестовой копии, не на прод без проверки):**
 

@@ -9,7 +9,16 @@ router.post('/', async (req, res) => {
   console.log('📥 Order request from:', req.ip);
   
   try {
-    const { name, phone, blindsType, message } = req.body || {};
+    const { name, phone, blindsType, message, website } = req.body || {};
+
+    if (website) {
+      console.log('🍯 Honeypot triggered from:', req.ip);
+      return res.status(201).json({
+        success: true,
+        orderId: 0,
+        message: 'Order created'
+      });
+    }
     
     const sanitizedName = sanitizeText(name, 120);
     const sanitizedPhone = sanitizePhone(phone);
