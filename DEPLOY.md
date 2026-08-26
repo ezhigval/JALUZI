@@ -78,15 +78,23 @@ npx wrangler deploy
 В `.env` на VM:
 
 ```env
-TELEGRAM_API_ROOT=https://piter-jaluzi-tg-proxy.<subdomain>.workers.dev
+TELEGRAM_API_ROOT=https://piter-jaluzi-tg-proxy.chemical-red.workers.dev
 TELEGRAM_MODE=webhook
 TELEGRAM_WEBHOOK_PATH=/telegram/webhook
 TELEGRAM_WEBHOOK_SECRET=<openssl rand -hex 24>
 SITE_URL=https://piter-jaluzi.ru
 ```
 
-Caddy отдаёт `POST /telegram/webhook` на `api`. Бот вызывает `setWebhook` через `TELEGRAM_API_ROOT` (CF Worker).  
-Пока DNS/SSL не готовы, временно `TELEGRAM_MODE=polling`.
+Актуальный Worker: аккаунт Cloudflare **Chemical Red**, имя `piter-jaluzi-tg-proxy`  
+(`deploy/cloudflare/wrangler.toml` уже содержит `account_id`).
+
+```bash
+cd deploy/cloudflare
+CLOUDFLARE_API_TOKEN=… npx wrangler deploy
+```
+
+Caddy отдаёт `POST /telegram/webhook` на `api`. Бот вызывает `setWebhook` через `TELEGRAM_API_ROOT`.  
+Пока Worker/DNS не готовы — временно `TELEGRAM_MODE=polling` (с RU VM часто не работает без прокси).
 
 ## 4. SSL (Let's Encrypt через Caddy)
 
@@ -117,9 +125,11 @@ docker compose logs web | tail -50
 ```env
 PUBLIC_GOOGLE_SITE_VERIFICATION=<код из Search Console>
 PUBLIC_YANDEX_VERIFICATION=<код из Вебмастера>
-PUBLIC_YANDEX_METRIKA_ID=
+PUBLIC_YANDEX_METRIKA_ID=111985236
 PUBLIC_GA_MEASUREMENT_ID=
 ```
+
+На проде Метрика уже включена (`111985236`). Пустой `PUBLIC_GA_*` — Google Analytics опционален.
 
 4. Пересоберите фронт (переменные `PUBLIC_*` вшиваются в образ Astro на этапе `build`, hot-patch HTML недостаточен):
 
@@ -195,3 +205,8 @@ EMAIL_PASS=…
 
 `deploy/api.Dockerfile` берёт Node с `mirror.gcr.io`.  
 Mailpit — с `ghcr.io/axllent/mailpit` (Hub с VM часто timeout).
+
+## 10. Версии и план
+
+- **v1** (текущий прод) — рабочий контур; чеклист в [ROADMAP.md](./ROADMAP.md)
+- **v2** — качество кода, скорость, конверсия, боевая почта; старт: [docs/V2.md](./docs/V2.md) шаг 1
