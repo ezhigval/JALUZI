@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "check": "node --check src/index.js && node --check test-backend.js && node --check test-api.js && node --check test-order.js && node --check test-front-contract.js && node --check test-telegram-bot.js",
+    "check": "node --check src/index.js && node --check test-backend.js && node --check test-api.js && node --check test-order.js && node --check test-front-contract.js && node --check test-telegram-bot.js && node --check test-catalog-sort.js",
     "normalize:data": "node src/scripts/normalize-db.js",
     "parse:catalog": "node parser/index.js",
     "test:smoke": "node test-backend.js",
