@@ -3,6 +3,7 @@ const { mainKeyboard, cancelKeyboard, categoryKeyboard, editProductKeyboard, pro
 const { setUserState, clearUserState } = require('../middleware/state');
 const { normalizeBlindsType, sanitizeLongText, sanitizeText } = require('../../utils/sanitize');
 const { escapeTelegramMarkdown } = require('../../utils/telegram');
+const L = require('../labels');
 
 // Helper: инлайн-клавиатура пагинации (только если страниц > 1)
 function getPaginationInlineKeyboard(page, totalPages) {
@@ -21,16 +22,16 @@ async function showProducts(bot, chatId, page = 1) {
   const totalPages = Math.ceil(products.length / perPage);
 
   if (!products.length) {
-    return bot.sendMessage(chatId, '📦 Товаров пока нет\n\nНажмите ➕ Добавить товар', productsMenuKeyboard);
+    return bot.sendMessage(chatId, 'Товаров пока нет. Нажмите «Добавить товар».', productsMenuKeyboard);
   }
 
   const start = (page - 1) * perPage;
   const pageProducts = products.slice(start, start + perPage);
 
-  let text = `📦 *Товары (${products.length})*\n\n`;
+  let text = `*Товары (${products.length})*\n\n`;
   pageProducts.forEach(p => {
     text += `*#${p.id}* ${escapeTelegramMarkdown(p.name)}\n`;
-    text += `${escapeTelegramMarkdown(p.category)} • ${p.price}₽/м² • ${p.in_stock ? '✅' : '❌'}\n\n`;
+    text += `${escapeTelegramMarkdown(p.category)} • ${p.price} ₽/м² • ${p.in_stock ? 'в наличии' : 'нет'}\n\n`;
   });
 
   const pagination = getPaginationInlineKeyboard(page, totalPages);
@@ -53,8 +54,8 @@ async function showStats(bot, chatId) {
   const ordersThisMonth = orders.filter(o => new Date(o.created_at) >= monthAgo).length;
   const reviewsThisMonth = reviews.filter(r => new Date(r.created_at) >= monthAgo).length;
 
-  const text = `📊 *Полная статистика*\n\n` +
-      `📦 *Товары*\n` +
+  const text = `*Статистика*\n\n` +
+      `*Товары*\n` +
       `Всего: *${products.length}*\n` +
       `В наличии: *${inStock}*\n` +
       `Нет в наличии: *${outOfStock}*\n` +
@@ -70,13 +71,13 @@ async function showStats(bot, chatId) {
 
 // Меню товаров
 async function productsMenu(bot, chatId) {
-  bot.sendMessage(chatId, '📦 *Управление товарами*', { parse_mode: 'Markdown', ...productsMenuKeyboard });
+  bot.sendMessage(chatId, '*Управление товарами*', { parse_mode: 'Markdown', ...productsMenuKeyboard });
 }
 
 // Начать добавление
 async function startAdd(bot, chatId) {
   setUserState(chatId, { action: 'add', step: 1, product: {} });
-  bot.sendMessage(chatId, '➕ *Добавление товара*\n\n1/5: Название товара:', { parse_mode: 'Markdown', ...cancelKeyboard });
+  bot.sendMessage(chatId, '*Добавление товара*\n\n1/5: Название:', { parse_mode: 'Markdown', ...cancelKeyboard });
 }
 
 // Начать редактирование (с пагинацией списка)
@@ -132,7 +133,7 @@ async function handleState(bot, msg, state) {
   const chatId = msg.chat.id;
   const text = msg.text;
 
-  if (text === '❌ Отмена' || text === '⬅️ Назад' || text === '⬅️ В меню') {
+  if (L.isNav(text)) {
     clearUserState(chatId);
     return bot.sendMessage(chatId, 'Возврат в меню.', mainKeyboard);
   }
@@ -207,39 +208,39 @@ async function handleEdit(bot, msg, state) {
   const chatId = msg.chat.id;
   const text = msg.text;
 
-  if (text === '✅ Готово') {
+  if (text === L.BTN_DONE) {
     clearUserState(chatId);
-    return bot.sendMessage(chatId, '✅ Готово!', mainKeyboard);
+    return bot.sendMessage(chatId, 'Готово.', mainKeyboard);
   }
 
-  if (text === '✏️ Название') {
+  if (text === L.BTN_NAME) {
     state.editField = 'name';
     bot.sendMessage(chatId, 'Новое название:', cancelKeyboard);
     return;
   }
 
-  if (text === '✏️ Категория') {
+  if (text === L.BTN_CATEGORY) {
     state.editField = 'category';
     bot.sendMessage(chatId, 'Новая категория:', categoryKeyboard);
     return;
   }
 
-  if (text === '✏️ Цена') {
+  if (text === L.BTN_PRICE) {
     state.editField = 'price';
     bot.sendMessage(chatId, 'Новая цена:', cancelKeyboard);
     return;
   }
 
-  if (text === '✏️ В наличии') {
+  if (text === L.BTN_STOCK) {
     state.product.in_stock = !state.product.in_stock;
     db.updateProduct(state.product.id, { in_stock: state.product.in_stock });
     // Не шлём новое сообщение — просто обновляем поле, пользователь видит клавиатуру
     return;
   }
 
-  if (text === '📷 Загрузить фото') {
+  if (text === L.BTN_UPLOAD_PHOTO) {
     state.editField = 'photo_upload';
-    bot.sendMessage(chatId, '📷 Отправьте фото файлом:', cancelKeyboard);
+    bot.sendMessage(chatId, 'Отправьте фото файлом:', cancelKeyboard);
     return;
   }
 

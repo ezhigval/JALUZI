@@ -1,0 +1,84 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import config from '../data/config.json';
+---
+<BaseLayout
+  title={`Публичная оферта | ${config.company.name}`}
+  description="Условия оказания услуг по изготовлению и установке жалюзи в Санкт-Петербурге."
+  canonical="/oferta"
+>
+  <Header />
+  <section class="section">
+    <div class="container legal-page">
+      <h1 class="section-title">Публичная оферта</h1>
+      <p class="legal-updated">Дата публикации: 26 августа 2026 г. · черновик для ознакомления</p>
+
+      <h2>1. Предмет</h2>
+      <p>
+        {config.company.name} оказывает услуги по замеру, изготовлению и монтажу жалюзи в Санкт-Петербурге и Ленобласти.
+        Отправка заявки на сайте является запросом на обратную связь, а не автоматическим заключением договора.
+      </p>
+
+      <h2>2. Порядок оформления заказа</h2>
+      <ol>
+        <li>Клиент оставляет заявку или звонит по телефону {config.company.phone}</li>
+        <li>Согласовывается бесплатный выезд замерщика</li>
+        <li>После замера фиксируются размеры, модель, сроки и итоговая стоимость</li>
+        <li>Договор и оплата — после согласования всех условий</li>
+      </ol>
+
+      <h2>3. Цены</h2>
+      <p>
+        Цены на сайте указаны «от … ₽/м²» и носят ориентировочный характер. Окончательная стоимость определяется после замера.
+      </p>
+
+      <h2>4. Гарантия</h2>
+      <p>Гарантия на изделия и монтаж — {config.company.warranty} при соблюдении правил эксплуатации.</p>
+
+      <h2>5. Персональные данные</h2>
+      <p>
+        Отправляя заявку, вы соглашаетесь с
+        <a href="/politika-konfidentsialnosti">политикой конфиденциальности</a>.
+      </p>
+
+      <h2>6. Реквизиты и контакты</h2>
+      <p>
+        {config.company.name}<br />
+        {config.company.address}<br />
+        Телефон: <a href={`tel:${config.company.phone}`}>{config.company.phone}</a><br />
+        Email: <a href={`mailto:${config.company.email}`}>{config.company.email}</a>
+      </p>
+    </div>
+  </section>
+  <Footer />
+</BaseLayout>
+
+<style>
+  .legal-page {
+    max-width: 760px;
+    color: var(--color-text-muted);
+    line-height: 1.75;
+  }
+
+  .legal-page h2 {
+    color: var(--color-text);
+    font-size: 1.15rem;
+    margin: 2rem 0 0.75rem;
+  }
+
+  .legal-page ol {
+    padding-left: 1.25rem;
+  }
+
+  .legal-updated {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .legal-page a {
+    color: var(--color-primary);
+  }
+</style>

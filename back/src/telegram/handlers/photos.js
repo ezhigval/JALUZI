@@ -1,4 +1,5 @@
 const db = require('../../database/db');
+const { editProductKeyboard } = require('../keyboards/main');
 const { saveTelegramPhoto } = require('../../services/uploads');
 const { clearUserState } = require('../middleware/state');
 const { escapeTelegramMarkdown } = require('../../utils/telegram');
@@ -36,13 +37,8 @@ async function handlePhotoUpload(bot, msg, state) {
       db.updateProduct(state.product.id, { image: imagePath });
       state.product.image = imagePath;
       
-      const kb = {
-        reply_markup: {
-          keyboard: [['✏️ Название', '✏️ Категория'], ['✏️ Цена', '✏️ В наличии'], ['📷 Загрузить фото', '✅ Готово'], ['❌ Отмена']],
-          resize_keyboard: true
-        }
-      };
-      await bot.sendMessage(chatId, `✅ Фото обновлено!`, kb);
+      const kb = editProductKeyboard;
+      await bot.sendMessage(chatId, 'Фото обновлено.', kb);
     }
     
     console.log('[Photo] ✅ Complete');

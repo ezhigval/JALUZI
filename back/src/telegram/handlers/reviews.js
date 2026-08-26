@@ -1,4 +1,5 @@
 const db = require('../../database/db');
+const L = require('../labels');
 const { mainKeyboard, cancelKeyboard, categoryKeyboard, reviewsMenuKeyboard } = require('../keyboards/main');
 const { setUserState, clearUserState } = require('../middleware/state');
 const { normalizeBlindsType, sanitizeLongText, sanitizeText } = require('../../utils/sanitize');
@@ -9,12 +10,12 @@ async function showAllReviews(bot, chatId) {
   const data = db.readDb();
   const reviews = data.reviews || [];
   
-  if (!reviews.length) return bot.sendMessage(chatId, '📝 Отзывов пока нет', reviewsMenuKeyboard);
+  if (!reviews.length) return bot.sendMessage(chatId, 'Отзывов пока нет.', reviewsMenuKeyboard);
   
-  let text = `📝 *Отзывы (${reviews.length})*\n\n`;
+  let text = `*Отзывы (${reviews.length})*\n\n`;
   reviews.slice(0, 10).forEach(r => {
     text += `*#${r.id}* ${escapeTelegramMarkdown(r.name)}\n`;
-    text += `${escapeTelegramMarkdown(r.blindsType)} • ⭐${r.rating}\n`;
+    text += `${escapeTelegramMarkdown(r.blindsType)} • ${r.rating}/5\n`;
     text += `"${escapeTelegramMarkdown(r.comment.substring(0, 50))}${r.comment.length > 50 ? '...' : ''}"\n\n`;
   });
   
@@ -25,13 +26,13 @@ async function showAllReviews(bot, chatId) {
 
 // Меню отзывов
 async function reviewsMenu(bot, chatId) {
-  bot.sendMessage(chatId, '📝 *Управление отзывами*', { parse_mode: 'Markdown', ...reviewsMenuKeyboard });
+  bot.sendMessage(chatId, '*Управление отзывами*', { parse_mode: 'Markdown', ...reviewsMenuKeyboard });
 }
 
 // Начать добавление отзыва
 async function startAddReview(bot, chatId) {
   setUserState(chatId, { action: 'add_review', step: 1, review: {} });
-  bot.sendMessage(chatId, '➕ *Добавление отзыва*\n\n1/4: Имя клиента:', { parse_mode: 'Markdown', ...cancelKeyboard });
+  bot.sendMessage(chatId, '*Добавление отзыва*\n\n1/4: Имя клиента:', { parse_mode: 'Markdown', ...cancelKeyboard });
 }
 
 // Начать удаление отзыва
@@ -55,7 +56,7 @@ async function handleState(bot, msg, state) {
   const chatId = msg.chat.id;
   const text = msg.text;
   
-  if (text === '❌ Отмена' || text === '⬅️ Назад' || text === '⬅️ В меню') {
+  if (L.isNav(text)) {
     clearUserState(chatId);
     return bot.sendMessage(chatId, 'Возврат в меню.', mainKeyboard);
   }

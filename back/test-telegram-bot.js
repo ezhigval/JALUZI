@@ -96,7 +96,7 @@ async function main() {
 
   await runStep('product back button exits wizard instead of corrupting data', async () => {
     await products.startAdd(bot, chatId);
-    await sendText(products.handleState, state.getUserState(chatId), '⬅️ Назад');
+    await sendText(products.handleState, state.getUserState(chatId), 'Назад');
     assert(state.getUserState(chatId) === null, 'Back must clear user state');
   });
 

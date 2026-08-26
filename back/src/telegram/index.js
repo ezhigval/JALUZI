@@ -30,6 +30,7 @@ const {
 } = require('./handlers/works');
 const { showHelp } = require('./handlers/menu');
 const { handlePhotoUpload: handleProductPhoto } = require('./handlers/photos');
+const L = require('./labels');
 
 let app = null;
 let bot = null;
@@ -133,12 +134,12 @@ function setupHandlers(telegrafApp, botApi) {
     if (!isAuthorized(chatId)) {
       if (text && !text.startsWith('/') && text === config.telegramBotPassword) {
         saveChat(chatId);
-        await botApi.sendMessage(chatId, '✅ Авторизация успешна!', mainKeyboard);
+        await botApi.sendMessage(chatId, 'Авторизация успешна.', mainKeyboard);
         return;
       }
 
       if (text && !text.startsWith('/')) {
-        await botApi.sendMessage(chatId, '🔐 Введите пароль или /start');
+        await botApi.sendMessage(chatId, 'Введите пароль или /start');
         return;
       }
 
@@ -157,83 +158,83 @@ function setupHandlers(telegrafApp, botApi) {
       return;
     }
 
-    if (text === '📊 Статистика') {
+    if (text === L.BTN_STATS) {
       await showStats(botApi, chatId);
       return;
     }
 
-    if (text === '📦 Товары') {
+    if (text === L.BTN_PRODUCTS) {
       await productsMenu(botApi, chatId);
       return;
     }
 
-    if (text === '📝 Отзывы') {
+    if (text === L.BTN_REVIEWS) {
       await reviewsMenu(botApi, chatId);
       return;
     }
 
-    if (text === '🖼️ Наши работы') {
+    if (text === L.BTN_WORKS) {
       await worksMenu(botApi, chatId);
       return;
     }
 
-    if (text === '📚 Помощь') {
+    if (text === L.BTN_HELP) {
       await showHelp(botApi, chatId);
       return;
     }
 
-    if (text === '⬅️ В меню' || text === '⬅️ Назад' || text === '❌ Отмена') {
+    if (L.isNav(text)) {
       clearUserState(chatId);
       await botApi.sendMessage(chatId, 'Главное меню:', mainKeyboard);
       return;
     }
 
-    if (text === '📦 Все товары') {
+    if (text === L.BTN_ALL_PRODUCTS) {
       await showProducts(botApi, chatId);
       return;
     }
 
-    if (text === '➕ Добавить товар') {
+    if (text === L.BTN_ADD_PRODUCT) {
       await startAdd(botApi, chatId);
       return;
     }
 
-    if (text === '✏️ Редактировать') {
+    if (text === L.BTN_EDIT) {
       await startEdit(botApi, chatId);
       return;
     }
 
-    if (text === '❌ Удалить') {
+    if (text === L.BTN_DELETE) {
       await startDelete(botApi, chatId);
       return;
     }
 
-    if (text === '📝 Все отзывы') {
+    if (text === L.BTN_ALL_REVIEWS) {
       await showAllReviews(botApi, chatId);
       return;
     }
 
-    if (text === '➕ Добавить отзыв') {
+    if (text === L.BTN_ADD_REVIEW) {
       await startAddReview(botApi, chatId);
       return;
     }
 
-    if (text === '❌ Удалить отзыв') {
+    if (text === L.BTN_DELETE_REVIEW) {
       await startDeleteReview(botApi, chatId);
       return;
     }
 
-    if (text === '🖼️ Все работы') {
+    if (text === L.BTN_ALL_WORKS) {
       await showAllWorks(botApi, chatId);
       return;
     }
 
-    if (text === '➕ Добавить работу') {
+    if (text === L.BTN_ADD_WORK) {
       await startAddWork(botApi, chatId);
       return;
     }
 
-    if (text === '❌ Удалить работу') {
+    if (text === L.BTN_DELETE_WORK) {
       await startDeleteWork(botApi, chatId);
       return;
     }
@@ -242,7 +243,7 @@ function setupHandlers(telegrafApp, botApi) {
   });
 
   telegrafApp.start(async (ctx) => {
-    await botApi.sendMessage(ctx.chat.id, '👋 Добро пожаловать в Питер-Жалюзи!', mainKeyboard);
+    await botApi.sendMessage(ctx.chat.id, 'Питер-Жалюзи — панель управления.', mainKeyboard);
   });
 
   telegrafApp.command('stats', async (ctx) => showStats(botApi, ctx.chat.id));

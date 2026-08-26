@@ -8,6 +8,8 @@ import { initWorksReviewsPage } from '/scripts/works-reviews-page.js';
 import { initContactMap } from '/scripts/contact-map.js';
 import { initMetrikaTracking } from '/scripts/metrika.js';
 
+import { initHomepageReviews } from '/scripts/homepage-reviews.js';
+
 document.addEventListener('DOMContentLoaded', () => {
   initMobileMenu();
   initOrderModal();
@@ -18,4 +20,5 @@ document.addEventListener('DOMContentLoaded', () => {
   initWorksReviewsPage();
   initContactMap();
   initMetrikaTracking();
+  initHomepageReviews();
 });

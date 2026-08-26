@@ -1,4 +1,5 @@
 const db = require('../../database/db');
+const L = require('../labels');
 const { saveTelegramPhoto } = require('../../services/uploads');
 const { mainKeyboard, cancelKeyboard, worksMenuKeyboard } = require('../keyboards/main');
 const { getUserState, setUserState, clearUserState } = require('../middleware/state');
@@ -10,9 +11,9 @@ async function showAllWorks(bot, chatId) {
   const data = db.readDb();
   const works = data.works || [];
   
-  if (!works.length) return bot.sendMessage(chatId, '🖼️ Работ пока нет', worksMenuKeyboard);
+  if (!works.length) return bot.sendMessage(chatId, 'Работ пока нет.', worksMenuKeyboard);
   
-  let text = `🖼️ *Наши работы (${works.length})*\n\n`;
+  let text = `*Наши работы (${works.length})*\n\n`;
   works.slice(0, 10).forEach(w => {
     text += `*#${w.id}* ${escapeTelegramMarkdown(w.title || 'Без названия')}\n`;
     text += `${escapeTelegramMarkdown(w.photo)}\n\n`;
@@ -25,7 +26,7 @@ async function showAllWorks(bot, chatId) {
 
 // Меню работ
 async function worksMenu(bot, chatId) {
-  bot.sendMessage(chatId, '🖼️ *Управление работами*', { parse_mode: 'Markdown', ...worksMenuKeyboard });
+  bot.sendMessage(chatId, '*Управление работами*', { parse_mode: 'Markdown', ...worksMenuKeyboard });
 }
 
 // Начать добавление работы
@@ -55,7 +56,7 @@ async function handleState(bot, msg, state) {
   const chatId = msg.chat.id;
   const text = msg.text;
   
-  if (text === '❌ Отмена' || text === '⬅️ Назад' || text === '⬅️ В меню') {
+  if (L.isNav(text)) {
     clearUserState(chatId);
     return bot.sendMessage(chatId, 'Возврат в меню.', mainKeyboard);
   }

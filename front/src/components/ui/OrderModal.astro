@@ -25,6 +25,11 @@ import config from '../../data/config.json';
       <textarea id="order-message" name="message" rows="3" placeholder="Комментарий" class="modal-textarea"></textarea>
       <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="order-honeypot" />
       <button type="submit" class="btn btn-primary">Отправить заявку</button>
+      <p class="order-consent">
+        Нажимая «Отправить», вы соглашаетесь с
+        <a href="/politika-konfidentsialnosti" target="_blank" rel="noopener">политикой конфиденциальности</a>
+        и <a href="/oferta" target="_blank" rel="noopener">офертой</a>.
+      </p>
       <p id="order-form-status" class="form-status" aria-live="polite"></p>
     </form>
     <div class="modal-footer">
@@ -42,5 +47,16 @@ import config from '../../data/config.json';
     height: 1px;
     opacity: 0;
     pointer-events: none;
+  }
+  .order-consent {
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+    margin: 0.75rem 0 0;
+    text-align: center;
+  }
+
+  .order-consent a {
+    color: var(--color-primary);
   }
 </style>

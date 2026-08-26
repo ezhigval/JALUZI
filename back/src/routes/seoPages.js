@@ -124,7 +124,10 @@ router.get('/sitemap.xml', (req, res) => {
     const staticPages = [
       { path: '/', changefreq: 'weekly', priority: '1.0' },
       { path: '/catalog', changefreq: 'daily', priority: '0.9' },
-      { path: '/works-reviews', changefreq: 'weekly', priority: '0.8' }
+      { path: '/works-reviews', changefreq: 'weekly', priority: '0.8' },
+      { path: '/thank-you', changefreq: 'monthly', priority: '0.3' },
+      { path: '/politika-konfidentsialnosti', changefreq: 'yearly', priority: '0.2' },
+      { path: '/oferta', changefreq: 'yearly', priority: '0.2' }
     ];
 
     const indexable = products.getIndexable();

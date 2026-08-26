@@ -163,7 +163,7 @@
 }
 
 .modal-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
   padding: 2rem;
   text-align: center;
   color: var(--color-white);
@@ -363,7 +363,7 @@
   color: var(--color-white);
   font-weight: 700;
   font-size: 1.2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
 }
 
 .review-card-meta {

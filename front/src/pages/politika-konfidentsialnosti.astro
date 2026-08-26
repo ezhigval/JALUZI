@@ -1,0 +1,94 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import config from '../data/config.json';
+---
+<BaseLayout
+  title={`Политика конфиденциальности | ${config.company.name}`}
+  description="Политика обработки персональных данных на сайте Питер-Жалюзи."
+  canonical="/politika-konfidentsialnosti"
+>
+  <Header />
+  <section class="section">
+    <div class="container legal-page">
+      <h1 class="section-title">Политика конфиденциальности</h1>
+      <p class="legal-updated">Дата публикации: 26 августа 2026 г.</p>
+
+      <h2>1. Общие положения</h2>
+      <p>
+        Настоящая политика определяет порядок обработки персональных данных пользователей сайта
+        {config.company.name} ({config.company.email}).
+      </p>
+
+      <h2>2. Какие данные мы собираем</h2>
+      <ul>
+        <li>Имя и телефон — при отправке заявки на замер или консультацию</li>
+        <li>Комментарий к заявке — по желанию пользователя</li>
+        <li>Технические данные — IP, cookies, данные Яндекс.Метрики для аналитики</li>
+      </ul>
+
+      <h2>3. Цели обработки</h2>
+      <ul>
+        <li>Обратный звонок и согласование замера</li>
+        <li>Подготовка коммерческого предложения</li>
+        <li>Улучшение сайта и сервиса</li>
+      </ul>
+
+      <h2>4. Передача третьим лицам</h2>
+      <p>
+        Данные не передаются третьим лицам, за исключением случаев, предусмотренных законодательством РФ,
+        и провайдеров хостинга/аналитики, необходимых для работы сайта.
+      </p>
+
+      <h2>5. Хранение и защита</h2>
+      <p>
+        Заявки хранятся на защищённом сервере. Срок хранения — до достижения целей обработки или до отзыва согласия.
+      </p>
+
+      <h2>6. Права пользователя</h2>
+      <p>
+        Вы можете запросить уточнение, блокировку или удаление данных, написав на
+        <a href={`mailto:${config.company.email}`}>{config.company.email}</a>
+        или позвонив <a href={`tel:${config.company.phone}`}>{config.company.phone}</a>.
+      </p>
+
+      <h2>7. Контакты оператора</h2>
+      <p>
+        {config.company.name}<br />
+        {config.company.address}<br />
+        Телефон: {config.company.phone}<br />
+        Email: {config.company.email}
+      </p>
+    </div>
+  </section>
+  <Footer />
+</BaseLayout>
+
+<style>
+  .legal-page {
+    max-width: 760px;
+    color: var(--color-text-muted);
+    line-height: 1.75;
+  }
+
+  .legal-page h2 {
+    color: var(--color-text);
+    font-size: 1.15rem;
+    margin: 2rem 0 0.75rem;
+  }
+
+  .legal-page ul {
+    padding-left: 1.25rem;
+  }
+
+  .legal-updated {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .legal-page a {
+    color: var(--color-primary);
+  }
+</style>

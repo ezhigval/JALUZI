@@ -10,7 +10,7 @@ const navItems = [
 ---
 <header class="header">
   <div class="container header-inner">
-    <a href="/" class="header-logo">🪟 {config.company.name}</a>
+    <a href="/" class="header-logo">{config.company.name}</a>
     
     <nav class="desktop-nav" aria-label="Основная навигация">
       {navItems.map(item => (
@@ -38,6 +38,6 @@ const navItems = [
     {navItems.map(item => (
       <a href={item.href} class="mobile-nav-link">{item.label}</a>
     ))}
-    <a href={`tel:${config.company.phone}`} class="mobile-nav-link header-phone">📞 {config.company.phone}</a>
+    <a href={`tel:${config.company.phone}`} class="mobile-nav-link header-phone">{config.company.phone}</a>
   </nav>
 </header>
