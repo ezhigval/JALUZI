@@ -1,9 +1,11 @@
 # AI Project Context
 
-Дата актуализации: 2026-08-23
+Дата актуализации: 2026-08-26
 
 Этот файл предназначен как единый handoff-документ для любой другой модели/агента.
 Если у новой модели есть только один файл для входа в проект, нужно читать именно этот.
+
+Планы версий: [ROADMAP.md](./ROADMAP.md) (v1 закрыт) → [docs/V2.md](./docs/V2.md) (следующий этап).
 
 ## 1. Что это за проект
 
@@ -20,13 +22,16 @@
 - `front/` — статический сайт на Astro
 - `back/` — Express API + Telegram admin bot + email listener + SQLite
 
-Типовая production-схема:
+Типовая production-схема (v1 на проде):
 
-- одна Ubuntu VM в Yandex Cloud
-- Caddy отдаёт `front/dist` и проксирует `/api`, `/uploads`, `/health` в API
-- данные API живут на Docker-томе `STORAGE_DIR=/var/data/jaluzi`
-- домен `piter-jaluzi.ru` остаётся на REG.RU, A-записи правятся вручную
-- почта остаётся на `mail.hosting.reg.ru`
+- одна Ubuntu VM в Yandex Cloud: `93.77.163.4`, путь `/opt/piter-jaluzi`
+- Docker Compose: `web` (Caddy), `api`, `worker`, `mailpit`
+- Caddy отдаёт `front/dist` и проксирует `/api`, `/uploads`, `/health`, `/telegram`, `/sitemap.xml`, `/catalog/p/*`
+- данные API живут на Docker-томе `STORAGE_DIR=/var/data/jaluzi` (SQLite `db.db` + uploads)
+- домен `piter-jaluzi.ru` на REG.RU, A-записи `@`/`www` → VM
+- исходящая почта заявок в v1 → **Mailpit** (боевой SMTP REG.RU — задача v2)
+- Telegram Bot API → Cloudflare Worker `https://piter-jaluzi-tg-proxy.chemical-red.workers.dev`
+- Яндекс.Метрика: счётчик `111985236`
 
 ## 2. Что важно понять сразу
 
@@ -35,10 +40,11 @@
 Архитектура такая:
 
 1. Astro рендерит статические HTML-страницы.
-2. Во `front/src/layouts/BaseLayout.astro` в `body` прокидывается `data-api-url`.
+2. Во `front/src/layouts/BaseLayout.astro` в `body` прокидывается `data-api-url` (+ SEO/Метрика при `PUBLIC_*`).
 3. Клиентские JS-модули из `front/public/scripts/` уже в браузере подтягивают динамику с бэкенда.
-4. Бэкенд хранит данные в JSON-файле и раздаёт их через REST API.
-5. Админка фактически реализована через Telegram-бота, который умеет редактировать товары, отзывы и работы.
+4. Бэкенд хранит данные в **SQLite** (`better-sqlite3`) и раздаёт их через REST API; JSON (`db.json`) — только seed/миграция.
+5. Товары: `source=parser` (Intersklad, витрина без SEO-страниц) и `source=manual` (`/catalog/p/<slug>` + sitemap).
+6. Админка — Telegram-бот (товары, отзывы, работы); процесс разделён: `PROCESS_ROLE=api|worker|all`.
 
 То есть фронт и бэк связаны только через HTTP API.
 
@@ -50,14 +56,18 @@
 - backend API brand label: `Piter-Jaluzi API`
 - frontend domain: `https://piter-jaluzi.ru`
 - email: `info@piter-jaluzi.ru`
-- почта размещается через REG.RU
+- git: [`ezhigval/JALUZI`](https://github.com/ezhigval/JALUZI)
+- домен DNS на REG.RU; VM IP `93.77.163.4`
 
-Почтовые настройки REG.RU, зафиксированные в проекте:
+Почта в **v1 (прод сейчас)**:
 
-- SMTP host: `mail.hosting.reg.ru`
-- SMTP port: `465`
-- IMAP host: `mail.hosting.reg.ru`
-- IMAP port: `993`
+- исходящие заявки: `EMAIL_HOST=mailpit`, порт `1025` (UI через SSH tunnel `:8025`)
+- IMAP listener выключен (пустые `INCOMING_EMAIL_*`), пока нет боевого ящика
+
+Боевой REG.RU (план v2, не текущий дефолт `.env.example`):
+
+- SMTP `mail.hosting.reg.ru:465`
+- IMAP `mail.hosting.reg.ru:993`
 
 ## 4. Что можно игнорировать при чтении проекта
 
@@ -71,7 +81,7 @@
 - `front/.git/`, `back/.git/`
 - `back/logs/`
 
-Корневой каталог — единый git-репозиторий `ezhigval/piter-jaluzi`.
+Корневой каталог — единый git-репозиторий `ezhigval/JALUZI`.
 `front/` и `back/` больше не являются отдельными git-репозиториями.
 
 ## 5. Корневая структура
@@ -79,9 +89,12 @@
 На уровне корня наиболее важны:
 
 - `README.md` — общий краткий readme
+- `ROADMAP.md` — статус v1 / план v2+
+- `docs/V2.md` — детальный бэклог v2 (шаг 1 = чистка кода / AI-следы)
 - `ARCHITECTURE.md` — краткая архитектурная сводка
-- `DEPLOY.md` — локальный запуск и Yandex Cloud / REG.RU DNS
-- `AI_PROJECT_CONTEXT.md` — этот файл
+- `DEPLOY.md` — Yandex Cloud, DNS, CF Worker, SEO/Метрика, autodeploy
+- `AI_PROJECT_CONTEXT.md` — этот файл (handoff)
+- `.env.example` — шаблон прод-env (без дублей `PUBLIC_*`)
 - `docker-compose.yml`
 - `deploy/`
 - `front/`
@@ -316,7 +329,7 @@
 - imapflow
 - mailparser
 - nodemailer 8
-- JSON-file storage
+- better-sqlite3 (основное хранилище); JSON — seed/миграция
 
 ### 7.2. Основные backend файлы
 
@@ -382,6 +395,8 @@
 - `authorizedChatsFile`
 - `telegramBotToken`
 - `telegramBotPassword`
+- `telegramApiRoot` (`TELEGRAM_API_ROOT` → CF Worker)
+- `processRole` (`PROCESS_ROLE`: `api` | `worker` | `all`)
 - `email.{host,port,user,pass}`
 - `incomingEmail.{host,port,user,pass}`
 
@@ -390,6 +405,7 @@
 - `PUBLIC_API_BASE_URL` приоритетнее runtime-хоста для абсолютных asset URLs
 - если `PUBLIC_API_BASE_URL` не задан, используется `RENDER_EXTERNAL_URL`, а потом `API_URL`
 - если задан `STORAGE_DIR`, данные и загрузки уезжают в persistent storage
+- в Docker: контейнер `api` = HTTP; `worker` = Telegram/IMAP без публичных портов
 
 ### 7.5. Static uploads
 
@@ -488,7 +504,7 @@ Order limiter:
 Важно:
 
 - `image` в API уже абсолютный URL
-- в JSON-хранилище изображение лежит как относительный путь `/uploads/...`
+- в хранилище изображение лежит как относительный путь `/uploads/...`
 
 `GET /api/products/:id`
 
@@ -636,30 +652,35 @@ Order limiter:
 - фронт отправляет русские значения
 - старые тесты и часть старых данных могли отправлять английские
 
-## 10. JSON storage и реальные модели данных
+## 10. Хранилище (SQLite) и модели данных
 
 ### 10.1. Где лежат данные
 
+**Primary:** SQLite через `back/src/database/db.js` (`better-sqlite3`).
+
 Локально по умолчанию:
 
-- `back/data/db.json`
+- `back/data/db.db` (или путь из `STORAGE_DIR`)
+- `back/data/db.json` — legacy seed / миграция в SQLite, не primary runtime
 - `back/data/authorizedChats.json`
 - `back/src/uploads/`
 
 В production при `STORAGE_DIR=/var/data/jaluzi`:
 
-- `/var/data/jaluzi/data/db.json`
+- `/var/data/jaluzi/data/db.db`
 - `/var/data/jaluzi/data/authorizedChats.json`
 - `/var/data/jaluzi/uploads/`
 
-### 10.2. Структура `db.json`
+### 10.2. Доменные сущности
 
-Корневые ключи:
+Таблицы / коллекции:
 
-- `products`
+- `products` (поля `source`: `parser` | `manual`, `slug`, `indexable`, …)
 - `orders`
 - `reviews`
 - `works`
+
+`parser` — витрина/модалки; `manual` — SEO HTML `/catalog/p/<slug>` + sitemap.
 
 ### 10.3. Product schema
 
@@ -863,12 +884,13 @@ Order limiter:
 - использует `nodemailer`
 - отправляет уведомление о новой заявке на `config.email.user`
 - брендированный sender name: `Питер-Жалюзи`
+- **v1 прод:** SMTP = Mailpit (`EMAIL_HOST=mailpit`, `EMAIL_PORT=1025`); боевой REG.RU — v2
 
 ### 12.2. Incoming email listener
 
 `back/src/services/emailListener.js`
 
-Назначение:
+Назначение (когда IMAP credentials заданы):
 
 - подключаться к почте через IMAP
 - находить непрочитанные письма
@@ -877,7 +899,7 @@ Order limiter:
 - если письмо похоже на заявку или на реальное письмо от человека, пересылать его целиком в Telegram
 - если письмо автоматическое, сервисное, внутреннее или спам-подобное, учитывать его в суточной сводке
 
-Текущее поведение:
+Поведение при активном IMAP:
 
 - раз в 3 минуты создаётся цикл проверки
 - на каждой проверке создаётся ImapFlow client
@@ -887,9 +909,12 @@ Order limiter:
 - после обработки письмо помечается как `\Seen` и IMAP keyword обработки
 - неважные письма не пересылаются в Telegram целиком, а копятся в daily digest
 
+**v1 прод:** `INCOMING_EMAIL_*` пустые → listener фактически выключен.
+
 ### 12.3. Telegram уведомления о почте
 
 Отправляются всем chat id из `authorizedChats.json`.
+Исходящие вызовы Bot API идут через `TELEGRAM_API_ROOT` (CF Worker `chemical-red`).
 
 ## 13. Runtime storage и деплой
 
@@ -908,13 +933,16 @@ Order limiter:
 
 ### 13.2. Production режим
 
-Одна Ubuntu VM в Yandex Cloud, Docker Compose:
+Одна Ubuntu VM в Yandex Cloud (`93.77.163.4`), Docker Compose:
 
-- Caddy отдаёт статику и проксирует `/api`, `/uploads`, `/health`
+- Caddy отдаёт статику и проксирует `/api`, `/uploads`, `/health`, `/telegram`, `/sitemap.xml`, `/catalog/p/*`
+- `api` + `worker` + `mailpit`
 - фронт собирается с пустым `PUBLIC_API_URL` (same-origin)
 - `PUBLIC_API_BASE_URL=https://piter-jaluzi.ru`
 - `STORAGE_DIR=/var/data/jaluzi` на Docker-томе
-- домен и почта остаются на REG.RU, вручную меняются только A-записи `@` и `www`
+- DNS на REG.RU: A `@`/`www` → VM
+- `TELEGRAM_API_ROOT=https://piter-jaluzi-tg-proxy.chemical-red.workers.dev`
+- `PUBLIC_YANDEX_METRIKA_ID=111985236`
 
 ### 13.3. Важное про диск
 
@@ -938,19 +966,16 @@ Order limiter:
 - `PUBLIC_API_BASE_URL=https://piter-jaluzi.ru`
 - `PUBLIC_API_URL=`
 
-Остальное:
+Остальное (см. корневой `.env.example`):
 
-- `TELEGRAM_BOT_TOKEN`
-- `TELEGRAM_BOT_PASSWORD`
-- `EMAIL_HOST=mail.hosting.reg.ru`
-- `EMAIL_PORT=465`
-- `EMAIL_USER=info@piter-jaluzi.ru`
-- `EMAIL_PASS=...`
-- `INCOMING_EMAIL_HOST=mail.hosting.reg.ru`
-- `INCOMING_EMAIL_PORT=993`
-- `INCOMING_EMAIL_USER=info@piter-jaluzi.ru`
-- `INCOMING_EMAIL_PASS=...`
+- `TELEGRAM_API_ROOT=https://piter-jaluzi-tg-proxy.chemical-red.workers.dev`
+- `TELEGRAM_BOT_TOKEN` / `TELEGRAM_BOT_PASSWORD` / webhook secret
+- `EMAIL_HOST=mailpit` / `EMAIL_PORT=1025` (v1); REG.RU — при переключении в v2
+- `INCOMING_EMAIL_*` пустые в v1
+- `PUBLIC_YANDEX_METRIKA_ID=111985236`
+- `PUBLIC_GOOGLE_SITE_VERIFICATION` / `PUBLIC_YANDEX_VERIFICATION`
 - `ACME_EMAIL=info@piter-jaluzi.ru`
+- `DEPLOY_HOOK_SECRET` / `AUTODEPLOY_*`
 
 ## 14. Тесты и команды
 
@@ -988,7 +1013,7 @@ Order limiter:
 
 - health
 - товары
-- существование JSON-базы
+- наличие хранилища (SQLite / legacy JSON seed)
 - write-test заявок по умолчанию выключен
 
 `back/test-order.js`
@@ -1002,7 +1027,7 @@ Order limiter:
 
 ### 14.4. Важное про тесты записи
 
-По умолчанию проект больше не засоряет `db.json` тестовыми заказами.
+По умолчанию проект больше не засоряет БД тестовыми заказами.
 
 Чтобы включить write-smoke:
 
@@ -1048,22 +1073,17 @@ ALLOW_WRITE_TESTS=1 node test-order.js
 
 ## 17. Известные ограничения и технические долги
 
-1. JSON-хранилище не является полноценной БД.
-   При росте проекта лучше мигрировать на PostgreSQL.
+Актуальный бэклог вынесен в **v2**: [docs/V2.md](./docs/V2.md) (порядок шагов — [ROADMAP.md](./ROADMAP.md)).
 
-2. Telegram state in-memory.
-   После рестарта wizard-состояния пользователей теряются.
+Кратко то, что ещё не «закрыто» в v1:
 
-3. Форма отзыва на фронте пока не загружает фото.
-   API поддерживает `photos`, но UI-форма отправляет только текстовый отзыв.
-
-4. Админка через Telegram удобна для малого проекта, но это не замена полноценной CMS.
-
-5. В `front/src/pages/works-reviews.astro` ещё остаётся заметный объём inline-styles.
-   Это не критическая ошибка, но потенциальная зона для дальнейшей чистки.
-
-6. В `back/data/db.json` есть исторические мусорные записи в orders с неидеальными данными.
-   Технически это не ломает проект, но при желании можно отдельно зачистить старые заявки.
+1. Следы ИИ / шум в UI и коде, placeholder-цены/описания — **шаг 1 v2**.
+2. Боевой SMTP/IMAP вместо Mailpit — **шаг 4 v2**.
+3. Производительность (hero images, payload каталога, CWV) — **шаг 2 v2**.
+4. Telegram wizard state in-memory (теряется после рестарта).
+5. Форма отзыва на фронте не загружает фото (API `photos` есть).
+6. Админка через Telegram — не полноценная CMS.
+7. Исторический seed `db.json` / мусорные orders — можно чистить отдельно; runtime = SQLite.
 
 ## 18. Что особенно важно будущей модели не сломать
 
@@ -1076,8 +1096,9 @@ ALLOW_WRITE_TESTS=1 node test-order.js
    - review: `id,name,blindsType,comment,rating,photos,created_at`
    - work: `id,title,photo,created_at`
 
-3. Asset paths в `db.json` должны оставаться относительными.
+3. Asset paths в БД должны оставаться относительными.
    Пример: `/uploads/products/file.jpg`
+   - product также: `source`, `slug`, `indexable` (parser vs manual / SEO)
 
 4. Для production нельзя убирать `STORAGE_DIR`/persistent disk.
 
@@ -1091,43 +1112,41 @@ ALLOW_WRITE_TESTS=1 node test-order.js
 Минимальный порядок действий для новой модели:
 
 1. Прочитать этот файл.
-2. Проверить `README.md`, `DEPLOY.md`, `ARCHITECTURE.md` только как вспомогательные материалы.
-3. Игнорировать `node_modules`, `dist`, `.astro`, `.git`, `.idea`.
-4. Для UI-изменений смотреть:
+2. Смотреть `ROADMAP.md` и `docs/V2.md` — что уже закрыто (v1) и что делать дальше.
+3. Проверить `README.md`, `DEPLOY.md`, `ARCHITECTURE.md` как вспомогательные материалы.
+4. Игнорировать `node_modules`, `dist`, `.astro`, `.git`, `.idea`.
+5. Для UI-изменений смотреть:
    - `front/src/pages/*`
    - `front/src/components/*`
    - `front/public/scripts/*`
    - `front/src/styles/*`
-5. Для данных и API смотреть:
+6. Для данных и API смотреть:
    - `back/src/index.js`
    - `back/src/config.js`
    - `back/src/routes/*`
    - `back/src/database/db.js`
    - `back/src/utils/*`
-6. Для Telegram-админки смотреть:
+7. Для Telegram-админки смотреть:
    - `back/src/telegram/index.js`
    - `back/src/telegram/handlers/*`
    - `back/src/telegram/keyboards/main.js`
-7. После любых значимых изменений гонять:
+8. После любых значимых изменений гонять:
    - `front/npm run build`
    - `back/npm run check`
    - при изменении контракта `back/npm run test:contract`
 
 ## 20. Текущее рабочее состояние на дату документа
 
-На дату 2026-04-04 подтверждено:
+На дату **2026-08-26**:
 
-- фронт собирается
-- бэкенд проходит syntax/check
-- контракт фронт-бэк проходит
-- локальная схема `localhost:4321 -> localhost:3001` рабочая
-- проект подготовлен под схему `Yandex Cloud Ubuntu VM + REG.RU DNS`
-- бренд и домен приведены к:
-  - `Питер-Жалюзи`
-  - `piter-jaluzi.ru`
-  - `info@piter-jaluzi.ru`
+- **v1 закрыт на проде** — см. [ROADMAP.md](./ROADMAP.md)
+- сайт: `https://piter-jaluzi.ru` на VM `93.77.163.4` (Yandex Cloud + REG.RU DNS + Caddy HTTPS)
+- стек: Astro front + Express/`PROCESS_ROLE` api|worker + SQLite + Mailpit + CF Telegram proxy (`chemical-red`)
+- каталог: Intersklad `source=parser` + manual SEO-товары; Метрика `111985236`
+- репозиторий: `ezhigval/JALUZI`
+- **следующий этап — v2**, первый шаг: оптимизация кода, баги, следы ИИ — [docs/V2.md](./docs/V2.md)
 
-Если будущая модель сомневается, с чего начать, нужно начинать с этого файла, потом смотреть реальные точки входа:
+Если будущая модель сомневается, с чего начать: этот файл → `ROADMAP.md` / `docs/V2.md` → точки входа:
 
 - `front/src/layouts/BaseLayout.astro`
 - `front/public/scripts/main.js`
