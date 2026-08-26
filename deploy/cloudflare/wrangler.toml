@@ -7,6 +7,12 @@ account_id = "476cc84b12b4d7eb7183ca8c13258390"
 #   CLOUDFLARE_API_TOKEN=… npx wrangler deploy
 # Live URL:
 #   https://piter-jaluzi-tg-proxy.chemical-red.workers.dev
+#
+# Webhook URL for Telegram (setWebhook):
+#   https://piter-jaluzi-tg-proxy.chemical-red.workers.dev/telegram/webhook
+
+[vars]
+WEBHOOK_TARGET = "https://piter-jaluzi.ru/telegram/webhook"
 
 # Optional: wrangler secret put WORKER_SHARED_SECRET
 # Then set the same value as a custom header from the app if you harden the proxy.
