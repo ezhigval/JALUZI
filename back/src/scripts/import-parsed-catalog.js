@@ -14,6 +14,7 @@ const crypto = require('crypto');
 const { getDb, initDb } = require('../database/initDb');
 const config = require('../config');
 const { SOURCE_PARSER } = require('../utils/productMeta');
+const { resizeImageFile } = require('../utils/imageResize');
 
 const CATEGORY_MAP = {
   'tkani-vertikalnye': 'Вертикальные',
@@ -49,7 +50,7 @@ function copyImage(record) {
       fs.mkdirSync(destDir, { recursive: true });
       const destName = `is-${basename}`.replace(/\s+/g, '_');
       const dest = path.join(destDir, destName);
-      fs.copyFileSync(src, dest);
+      resizeImageFile(src, dest);
       return `/uploads/products/${destName}`;
     }
   }
