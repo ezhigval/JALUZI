@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import config from '../data/config.json';
+
+const yandexMetrikaId = (import.meta.env.PUBLIC_YANDEX_METRIKA_ID || '').trim();
+---
+<BaseLayout
+  title={`Заявка принята | ${config.company.name}`}
+  description="Спасибо за заявку. Мы перезвоним в ближайшее время для согласования бесплатного замера."
+  canonical="/thank-you"
+>
+  <Header />
+  <section class="section">
+    <div class="container" style="max-width:640px;text-align:center;">
+      <h1 class="section-title">Спасибо за заявку!</h1>
+      <p style="color:var(--color-text-muted);font-size:1.1rem;line-height:1.7;margin-bottom:2rem;">
+        Мы получили вашу заявку и перезвоним в ближайшее время, чтобы согласовать бесплатный замер.
+      </p>
+      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+        <a href="/" class="btn btn-primary">На главную</a>
+        <a href="/catalog" class="btn btn-outline">Смотреть каталог</a>
+        <a href={`tel:${config.company.phone}`} class="btn btn-outline">Позвонить</a>
+      </div>
+    </div>
+  </section>
+  <Footer />
+  {yandexMetrikaId ? (
+    <script is:inline define:vars={{ yandexMetrikaId }}>
+      (function fireThankYouGoal() {
+        function send() {
+          if (typeof window.ym === 'function') {
+            window.ym(Number(yandexMetrikaId), 'reachGoal', 'order_thank_you');
+          }
+        }
+        if (typeof window.ym === 'function') {
+          send();
+        } else {
+          window.addEventListener('load', send, { once: true });
+        }
+      })();
+    </script>
+  ) : null}
+</BaseLayout>

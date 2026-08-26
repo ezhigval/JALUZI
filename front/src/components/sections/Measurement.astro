@@ -1,0 +1,71 @@
+---
+const steps = [
+  { title: 'Заявка или звонок', text: 'Оставляете заявку на сайте или звоните — согласуем удобное время.' },
+  { title: 'Бесплатный замер', text: 'Замерщик приезжает с образцами, замеряет проёмы и помогает с выбором.' },
+  { title: 'Расчёт и договор', text: 'Фиксируем цену «от … ₽/м²», срок изготовления и монтажа.' },
+  { title: 'Изготовление и установка', text: 'Производим на собственном производстве и монтируем за 1 визит.' }
+];
+---
+<section id="measurement" class="section" style="background:var(--color-bg);">
+  <div class="container">
+    <h2 class="section-title">Как проходит замер</h2>
+    <div class="measurement-grid">
+      {steps.map((step, index) => (
+        <article class="measurement-step">
+          <div class="measurement-num">{index + 1}</div>
+          <h3>{step.title}</h3>
+          <p>{step.text}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .measurement-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+  }
+
+  .measurement-step {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 1.25rem;
+    box-shadow: var(--shadow-md);
+  }
+
+  .measurement-num {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    background: var(--color-primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+
+  .measurement-step h3 {
+    font-size: 1rem;
+    margin: 0 0 0.5rem;
+    color: var(--color-text);
+  }
+
+  .measurement-step p {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 900px) {
+    .measurement-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 560px) {
+    .measurement-grid { grid-template-columns: 1fr; }
+  }
+</style>

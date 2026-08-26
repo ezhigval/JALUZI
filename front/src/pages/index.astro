@@ -1,10 +1,13 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import OrderModal from '../components/ui/OrderModal.astro';
+import StickyCta from '../components/ui/StickyCta.astro';
 import Header from '../components/layout/Header.astro';
 import Hero from '../components/sections/Hero.astro';
 import Features from '../components/sections/Features.astro';
 import CatalogPreview from '../components/sections/CatalogPreview.astro';
+import Measurement from '../components/sections/Measurement.astro';
+import PriceFrom from '../components/sections/PriceFrom.astro';
 import Repair from '../components/sections/Repair.astro';
 import About from '../components/sections/About.astro';
 import ContactForm from '../components/sections/ContactForm.astro';
@@ -17,10 +20,13 @@ import config from '../data/config.json';
   canonical="/"
 >
   <OrderModal />
+  <StickyCta />
   <Header />
   <Hero />
   <Features />
+  <PriceFrom />
   <CatalogPreview />
+  <Measurement />
   <Repair />
   <About />
   <ContactForm />

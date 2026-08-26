@@ -1,5 +1,6 @@
 import { fetchJson, setStatus } from '/scripts/api.js';
 import { lockScroll, unlockScroll } from '/scripts/scroll-lock.js';
+import { reachGoal } from '/scripts/metrika.js';
 
 export function initOrderModal() {
   const orderModal = document.getElementById('order-modal');
@@ -55,9 +56,9 @@ export function initOrderModal() {
           body: JSON.stringify(data) 
         });
 
-        setStatus(statusEl, 'Спасибо! Заявка отправлена.', 'success');
+        reachGoal('order_submit');
         form.reset();
-        setTimeout(() => window.closeOrderModal(), 800);
+        window.location.href = '/thank-you';
       } catch (error) {
         console.error('Order error:', error);
         setStatus(statusEl, error.message || 'Не удалось отправить заявку.', 'error');

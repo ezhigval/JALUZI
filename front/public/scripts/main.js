@@ -6,6 +6,7 @@ import { initCatalogPreview } from '/scripts/catalog-preview.js';
 import { initCatalogPage } from '/scripts/catalog-page.js';
 import { initWorksReviewsPage } from '/scripts/works-reviews-page.js';
 import { initContactMap } from '/scripts/contact-map.js';
+import { initMetrikaTracking } from '/scripts/metrika.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   initMobileMenu();
@@ -16,4 +17,5 @@ document.addEventListener('DOMContentLoaded', () => {
   initCatalogPage();
   initWorksReviewsPage();
   initContactMap();
+  initMetrikaTracking();
 });

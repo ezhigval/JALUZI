@@ -1,0 +1,59 @@
+---
+import config from '../../data/config.json';
+---
+<div id="sticky-cta" class="sticky-cta" aria-label="Быстрые действия">
+  <a href={`tel:${config.company.phone}`} class="sticky-cta-btn sticky-cta-phone">Позвонить</a>
+  <button type="button" data-open-order-modal class="sticky-cta-btn sticky-cta-order">Заявка</button>
+</div>
+
+<style>
+  .sticky-cta {
+    display: none;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 45;
+    padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    background: rgba(255, 255, 255, 0.98);
+    border-top: 1px solid #E2E8F0;
+    box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.08);
+    gap: 0.75rem;
+  }
+
+  .sticky-cta-btn {
+    flex: 1;
+    min-height: 48px;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-align: center;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  .sticky-cta-phone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    color: var(--color-primary);
+    border: 2px solid var(--color-primary);
+  }
+
+  .sticky-cta-order {
+    background: var(--color-primary);
+    color: #fff;
+  }
+
+  @media (max-width: 768px) {
+    .sticky-cta {
+      display: flex;
+    }
+
+    body {
+      padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    }
+  }
+</style>

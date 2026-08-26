@@ -1,0 +1,75 @@
+---
+import config from '../../data/config.json';
+
+const pricing = config.pricing?.fromPerSqm || {};
+const categories = Object.keys(pricing).filter((key) => key !== 'default');
+const defaultPrice = pricing.default || 890;
+---
+<section id="prices" class="section">
+  <div class="container" style="max-width:720px;">
+    <h2 class="section-title">Цены от … ₽/м²</h2>
+    <p style="text-align:center;color:var(--color-text-muted);margin:-1rem 0 1.5rem;">
+      Ориентир по категориям. Точная стоимость — после бесплатного замера.
+    </p>
+    <div class="price-calculator">
+      <label for="price-category">Категория жалюзи</label>
+      <select id="price-category">
+        {categories.map((category) => (
+          <option value={category}>{category}</option>
+        ))}
+      </select>
+      <div id="price-result" class="price-result">
+        от <strong>{categories.length ? pricing[categories[0]] : defaultPrice}</strong> ₽/м²
+      </div>
+      <button type="button" data-open-order-modal class="btn btn-primary" style="width:100%;margin-top:1rem;">
+        Вызвать замерщика
+      </button>
+    </div>
+  </div>
+</section>
+
+<script define:vars={{ pricing, defaultPrice }}>
+  const select = document.getElementById('price-category');
+  const result = document.getElementById('price-result');
+
+  function updatePrice() {
+    if (!select || !result) return;
+    const category = select.value;
+    const price = pricing[category] ?? defaultPrice;
+    result.innerHTML = `от <strong>${price}</strong> ₽/м²`;
+  }
+
+  select?.addEventListener('change', updatePrice);
+</script>
+
+<style>
+  .price-calculator {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-md);
+  }
+
+  .price-calculator label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--color-text);
+  }
+
+  .price-calculator select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #E2E8F0;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .price-result {
+    text-align: center;
+    font-size: 1.75rem;
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+</style>
