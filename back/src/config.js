@@ -71,6 +71,7 @@ module.exports = {
   telegramApiRoot,
   telegramMode,
   telegramWebhookPath: process.env.TELEGRAM_WEBHOOK_PATH || '/telegram/webhook',
+  telegramWebhookPublicUrl: normalizeUrl(process.env.TELEGRAM_WEBHOOK_PUBLIC_URL) || '',
   telegramWebhookSecret: process.env.TELEGRAM_WEBHOOK_SECRET || '',
   email: {
     host: process.env.EMAIL_HOST || '',

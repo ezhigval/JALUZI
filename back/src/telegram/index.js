@@ -289,21 +289,25 @@ function initBot({ mode = 'full' } = {}) {
           .split('/')[0];
       }
 
-      if (!hostname) {
-        console.error('❌ SITE_URL required for TELEGRAM_MODE=webhook');
+      if (!hostname && !config.telegramWebhookPublicUrl) {
+        console.error('❌ SITE_URL or TELEGRAM_WEBHOOK_PUBLIC_URL required for TELEGRAM_MODE=webhook');
         return Promise.resolve(null);
       }
 
-      return app
-        .createWebhook({
-          domain: hostname,
-          path: webhookPath,
-          secretToken: config.telegramWebhookSecret || undefined
+      const hookUrl =
+        config.telegramWebhookPublicUrl || `https://${hostname}${webhookPath}`;
+
+      return app.telegram
+        .setWebhook(hookUrl, {
+          secret_token: config.telegramWebhookSecret || undefined,
+          allowed_updates: ['message', 'callback_query'],
+          max_connections: 40
         })
-        .then((middleware) => {
-          console.log(
-            `🤖 Telegram webhook → https://${hostname}${webhookPath} via ${config.telegramApiRoot}`
-          );
+        .then(() => {
+          const middleware = app.webhookCallback(webhookPath, {
+            secretToken: config.telegramWebhookSecret || undefined
+          });
+          console.log(`🤖 Telegram webhook → ${hookUrl} via ${config.telegramApiRoot}`);
           bot.webhookMiddleware = middleware;
           bot.webhookPath = webhookPath;
           return bot;
