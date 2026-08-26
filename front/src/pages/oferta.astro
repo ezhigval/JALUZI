@@ -3,6 +3,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/layout/Header.astro';
 import Footer from '../components/layout/Footer.astro';
 import config from '../data/config.json';
+
+const pricing = config.pricing?.fromPerSqm ?? {};
+const categoryPrices = Object.entries(pricing).filter(([key]) => key !== 'default');
+const defaultPrice = Number(pricing['default']) || 890;
+const minPrice = categoryPrices.length
+  ? Math.min(...categoryPrices.map(([, price]) => Number(price) || defaultPrice))
+  : defaultPrice;
 ---
 <BaseLayout
   title={`Публичная оферта | ${config.company.name}`}
@@ -31,7 +38,7 @@ import config from '../data/config.json';
 
       <h2>3. Цены</h2>
       <p>
-        Цены на сайте указаны «от … ₽/м²» и носят ориентировочный характер. Окончательная стоимость определяется после замера.
+        Цены на сайте указаны «от {minPrice} ₽/м²» и носят ориентировочный характер. Окончательная стоимость определяется после замера.
       </p>
 
       <h2>4. Гарантия</h2>
