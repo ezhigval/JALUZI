@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/layout/Header.astro';
 import Footer from '../components/layout/Footer.astro';
 import OrderModal from '../components/ui/OrderModal.astro';
+import StickyCta from '../components/ui/StickyCta.astro';
 import config from '../data/config.json';
 ---
 <BaseLayout 
@@ -11,6 +12,7 @@ import config from '../data/config.json';
   canonical="/works-reviews"
 >
   <OrderModal />
+  <StickyCta />
   <Header />
   
   <main>
