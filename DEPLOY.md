@@ -106,13 +106,13 @@ docker compose logs web | tail -50
 
 Если домен ещё на `31.31.x.x` (parking REG.RU) — сертификат и webhook не заработают, пока не смените A-записи.
 
-## 4. Google Search Console и Яндекс.Вебмастер
+## 5. Google Search Console и Яндекс.Вебмастер (подробно)
 
-Техническая база (JSON-LD LocalBusiness/WebSite, Open Graph, `robots.txt` Host/Clean-param, sitemap) уже в коде. Чтобы поисковики приняли сайт:
+Техническая база (JSON-LD LocalBusiness/WebSite, Open Graph, `robots.txt` Host/Clean-param, sitemap) уже в коде. Краткая шпаргалка также в разделе «Каталог и SEO» выше. Чтобы поисковики приняли сайт:
 
 1. Зарегистрируйте сайт в [Google Search Console](https://search.google.com/search-console) и [Яндекс.Вебмастер](https://webmaster.yandex.ru) как `https://piter-jaluzi.ru`.
-2. Выберите проверку через HTML-meta (`google-site-verification` / `yandex-verification`) и скопируйте **только значение** `content=…`.
-3. На VM в `/opt/piter-jaluzi/.env` добавьте (и при необходимости ID счётчиков):
+2. Выберите проверку через HTML-meta (`google-site-verification` / `yandex-verification`) и скопируйте **только значение** `content=…` (или используйте уже задеплоенный файл `/yandex_409902539b5ca292.html`).
+3. На VM в `/opt/piter-jaluzi/.env` добавьте (перекрывают значения из `front/src/data/config.json`; при необходимости — ID счётчиков):
 
 ```env
 PUBLIC_GOOGLE_SITE_VERIFICATION=<код из Search Console>
@@ -133,7 +133,7 @@ docker compose up -d web
 
 Рост позиций занимает время; этот шаг только подключает индексацию и аналитику.
 
-## 5. Первый запуск / обновление на VM
+## 6. Первый запуск / обновление на VM
 
 ```bash
 cd /opt/piter-jaluzi
@@ -149,7 +149,7 @@ ssh -L 8025:127.0.0.1:8025 smailikin70@93.77.163.4
 # открыть http://127.0.0.1:8025
 ```
 
-## 6. Постоянный доступ агента (не Pinggy)
+## 7. Постоянный доступ агента (не Pinggy)
 
 ### A. Autodeploy с GitHub (рекомендуется)
 
@@ -176,7 +176,7 @@ sudo ./deploy/install-cloudflared.sh
 
 В Zero Trust привяжите hostname → `ssh://localhost:22`.
 
-## 7. Почта
+## 8. Почта
 
 По умолчанию исходящие заявки → **Mailpit** (`EMAIL_HOST=mailpit`, порт `1025`).  
 IMAP listener выключен (`INCOMING_EMAIL_HOST=` пустой), пока REG.RU пароль не починен.
@@ -191,7 +191,7 @@ EMAIL_USER=info@piter-jaluzi.ru
 EMAIL_PASS=…
 ```
 
-## 8. Образы без Docker Hub
+## 9. Образы без Docker Hub
 
 `deploy/api.Dockerfile` берёт Node с `mirror.gcr.io`.  
 Mailpit — с `ghcr.io/axllent/mailpit` (Hub с VM часто timeout).
