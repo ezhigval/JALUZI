@@ -4,10 +4,10 @@ import { renderProductEntry } from '/scripts/product-markup.js';
 
 const ITEMS_PER_PAGE = 12;
 
-let allProducts = [];
 let filteredProducts = [];
 let currentPage = 1;
 let currentCategory = 'Все';
+let currentQuery = '';
 
 function renderPagination(totalItems) {
   const pagination = document.getElementById('pagination');
@@ -21,10 +21,8 @@ function renderPagination(totalItems) {
 
   const buttons = [];
 
-  // Кнопка "Назад"
   buttons.push(`<button class="btn page-btn" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''}>◀</button>`);
 
-  // Номера страниц
   for (let i = 1; i <= totalPages; i++) {
     if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
       const active = i === currentPage ? 'style="background:#2563EB;color:white;border-color:#2563EB;"' : '';
@@ -34,20 +32,17 @@ function renderPagination(totalItems) {
     }
   }
 
-  // Кнопка "Вперёд"
   buttons.push(`<button class="btn page-btn" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled' : ''}>▶</button>`);
 
   pagination.innerHTML = buttons.join('');
 
-  // Обработчики кликов
   pagination.querySelectorAll('.page-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
-      const page = parseInt(e.currentTarget.dataset.page);
+      const page = parseInt(e.currentTarget.dataset.page, 10);
       if (page && page !== currentPage) {
         currentPage = page;
         renderProducts();
         renderPagination(filteredProducts.length);
-        // Плавный скролл к началу списка
         document.getElementById('products-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     });
@@ -70,20 +65,7 @@ function renderProducts() {
   hydrateAssetImages(grid);
 }
 
-function filterProducts(category) {
-  currentCategory = category;
-  currentPage = 1;
-
-  if (category === 'Все') {
-    filteredProducts = [...allProducts];
-  } else {
-    filteredProducts = allProducts.filter(p => p.category === category);
-  }
-
-  renderProducts();
-  renderPagination(filteredProducts.length);
-
-  // Обновляем визуальное состояние кнопок категорий
+function updateCategoryButtons(category) {
   document.querySelectorAll('#category-filters .btn').forEach(btn => {
     const isCat = btn.dataset.category === category;
     btn.style.background = isCat ? '#2563EB' : 'white';
@@ -92,38 +74,68 @@ function filterProducts(category) {
   });
 }
 
-export async function initCatalogPage() {
-  const grid = document.getElementById('products-grid');
-  const filters = document.getElementById('category-filters');
+function buildProductsUrl() {
+  const params = new URLSearchParams();
+  if (currentCategory && currentCategory !== 'Все') {
+    params.set('category', currentCategory);
+  }
+  if (currentQuery.trim()) {
+    params.set('q', currentQuery.trim());
+  }
+  const query = params.toString();
+  return query ? `/api/products?${query}` : '/api/products';
+}
 
+async function loadProducts() {
+  const grid = document.getElementById('products-grid');
   if (!grid) return;
 
-  try {
-    const { data } = await fetchJson('/api/products');
-    allProducts = Array.isArray(data) ? data : [];
-    filteredProducts = [...allProducts];
+  grid.innerHTML = '<div class="section-placeholder">Загружаем товары...</div>';
 
-    if (!allProducts.length) {
-      grid.innerHTML = '<div class="section-placeholder">Товары пока не добавлены.</div>';
+  try {
+    const { data } = await fetchJson(buildProductsUrl());
+    filteredProducts = Array.isArray(data) ? data : [];
+    currentPage = 1;
+
+    if (!filteredProducts.length) {
+      grid.innerHTML = '<div class="section-placeholder">Товары не найдены.</div>';
+      document.getElementById('pagination').innerHTML = '';
       return;
     }
 
-    // Инициализация фильтров
-    if (filters) {
-      filters.querySelectorAll('.btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const category = e.currentTarget.dataset.category;
-          filterProducts(category);
-        });
-      });
-    }
-
-    // Первый рендер
     renderProducts();
     renderPagination(filteredProducts.length);
-
   } catch (error) {
     console.error('Catalog page error:', error);
     grid.innerHTML = '<div class="section-placeholder" data-state="error">Не удалось загрузить товары.</div>';
   }
+}
+
+export async function initCatalogPage() {
+  const grid = document.getElementById('products-grid');
+  const filters = document.getElementById('category-filters');
+  const search = document.getElementById('catalog-search');
+
+  if (!grid) return;
+
+  if (filters) {
+    filters.querySelectorAll('.btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        currentCategory = e.currentTarget.dataset.category;
+        updateCategoryButtons(currentCategory);
+        loadProducts();
+      });
+    });
+  }
+
+  if (search) {
+    let debounceTimer;
+    search.addEventListener('input', (e) => {
+      currentQuery = e.target.value;
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(loadProducts, 250);
+    });
+  }
+
+  await loadProducts();
 }

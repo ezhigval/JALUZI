@@ -7,7 +7,10 @@ import config from '../../data/config.json';
     
     <div class="about-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:center;margin-bottom:3rem;">
       <div class="about-image">
-        <img src="/about.jpeg" alt="Наш офис" style="width:100%;border-radius:1rem;box-shadow:0 10px 30px rgba(0,0,0,0.1);" />
+        <picture>
+          <source srcset="/about.webp" type="image/webp" />
+          <img src="/about.jpeg" alt="Наш офис" width="800" height="600" loading="lazy" decoding="async" style="width:100%;border-radius:1rem;box-shadow:0 10px 30px rgba(0,0,0,0.1);" />
+        </picture>
       </div>
       <div class="about-text" style="color:#64748B;line-height:1.8;font-size:1rem;">
         <p style="margin-bottom:1.5rem;">Мы производим жалюзи с 2006 года. За это время установили более 15 000 изделий в квартирах, домах и офисах Санкт-Петербурга.</p>
