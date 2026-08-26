@@ -17,7 +17,7 @@ Telegram admin bot работает во `worker`. Исходящие заявк
 ### Google Search Console + Яндекс.Вебмастер
 
 1. [Google Search Console](https://search.google.com/search-console) → ресурс `https://piter-jaluzi.ru` → подтверждение meta `google-site-verification` (код в `.env` / `config.json`).
-2. [Яндекс.Вебмастер](https://webmaster.yandex.ru) → сайт → HTML-файл ` /yandex_409902539b5ca292.html` или meta `yandex-verification`.
+2. [Яндекс.Вебмастер](https://webmaster.yandex.ru) → сайт → HTML-файл `/yandex_132f0d56d1d3cf89.html` или meta `yandex-verification`.
 3. После деплоя отправить sitemap: `https://piter-jaluzi.ru/sitemap.xml`.
 4. Для Метрики/GA задать `PUBLIC_YANDEX_METRIKA_ID` / `PUBLIC_GA_MEASUREMENT_ID` и пересобрать `web`.
 
@@ -111,7 +111,7 @@ docker compose logs web | tail -50
 Техническая база (JSON-LD LocalBusiness/WebSite, Open Graph, `robots.txt` Host/Clean-param, sitemap) уже в коде. Краткая шпаргалка также в разделе «Каталог и SEO» выше. Чтобы поисковики приняли сайт:
 
 1. Зарегистрируйте сайт в [Google Search Console](https://search.google.com/search-console) и [Яндекс.Вебмастер](https://webmaster.yandex.ru) как `https://piter-jaluzi.ru`.
-2. Выберите проверку через HTML-meta (`google-site-verification` / `yandex-verification`) и скопируйте **только значение** `content=…` (или используйте уже задеплоенный файл `/yandex_409902539b5ca292.html`).
+2. Выберите проверку через HTML-meta (`google-site-verification` / `yandex-verification`) и скопируйте **только значение** `content=…` (или используйте уже задеплоенный файл `/yandex_132f0d56d1d3cf89.html`).
 3. На VM в `/opt/piter-jaluzi/.env` добавьте (перекрывают значения из `front/src/data/config.json`; при необходимости — ID счётчиков):
 
 ```env
