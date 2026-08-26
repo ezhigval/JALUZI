@@ -44,8 +44,26 @@ export function renderProductEntry(product) {
           <span style="color:var(--color-primary);font-size:0.8rem;">${category}</span>
           <h2 style="font-size:1.5rem;margin:0.5rem 0;">${name}</h2>
           <p style="color:var(--color-text-muted);margin:1rem 0;line-height:1.7;">${description}</p>
-          <div style="font-size:1.5rem;font-weight:bold;color:var(--color-primary);margin:1.5rem 0;">от ${price} ₽/м²</div>
-          <button data-open-order-modal data-close-modal class="btn btn-primary" type="button" style="width:100%;">Заказать</button>
+          <div style="font-size:1.5rem;font-weight:bold;color:var(--color-primary);margin:1.5rem 0 0;">от ${price} ₽/м²</div>
+          <div class="product-price-calculator" data-price-per-m2="${price}">
+            <div class="product-calc-fields">
+              <label>
+                <span>Ширина (см)</span>
+                <input type="number" class="modal-input product-calc-width" min="1" step="1" inputmode="numeric" value="100" aria-label="Ширина в сантиметрах" />
+              </label>
+              <label>
+                <span>Высота (см)</span>
+                <input type="number" class="modal-input product-calc-height" min="1" step="1" inputmode="numeric" value="150" aria-label="Высота в сантиметрах" />
+              </label>
+              <label>
+                <span>Количество</span>
+                <input type="number" class="modal-input product-calc-quantity" min="1" step="1" inputmode="numeric" value="1" aria-label="Количество" />
+              </label>
+            </div>
+            <div class="product-calc-result">Примерная стоимость: <strong>—</strong></div>
+            <p class="product-calc-disclaimer">Цена ориентировочная. Точный расчёт — после бесплатного замера.</p>
+          </div>
+          <button data-open-order-modal data-close-modal class="btn btn-primary" type="button" style="width:100%;margin-top:1rem;">Заказать</button>
         </div>
       </div>
     </div>

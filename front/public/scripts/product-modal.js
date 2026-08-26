@@ -1,5 +1,35 @@
 import { lockScroll, unlockScroll } from '/scripts/scroll-lock.js';
 
+function formatRub(amount) {
+  return new Intl.NumberFormat('ru-RU').format(Math.round(amount));
+}
+
+function updateProductCalculator(calcEl) {
+  if (!(calcEl instanceof HTMLElement)) return;
+
+  const pricePerM2 = Number(calcEl.dataset.pricePerM2) || 0;
+  const width = Number(calcEl.querySelector('.product-calc-width')?.value) || 0;
+  const height = Number(calcEl.querySelector('.product-calc-height')?.value) || 0;
+  const quantity = Number(calcEl.querySelector('.product-calc-quantity')?.value) || 0;
+  const resultEl = calcEl.querySelector('.product-calc-result strong');
+
+  if (!resultEl) return;
+
+  if (pricePerM2 <= 0 || width <= 0 || height <= 0 || quantity <= 0) {
+    resultEl.textContent = '—';
+    return;
+  }
+
+  const areaM2 = (width / 100) * (height / 100);
+  const total = areaM2 * pricePerM2 * quantity;
+  resultEl.textContent = `${formatRub(total)} ₽`;
+}
+
+function initCalculatorInModal(modal) {
+  const calc = modal.querySelector('.product-price-calculator');
+  if (calc) updateProductCalculator(calc);
+}
+
 export function initProductModals() {
   const openModal = (modal) => {
     modal.style.display = 'flex';
@@ -10,6 +40,11 @@ export function initProductModals() {
     modal.style.display = 'none';
     unlockScroll(`product-modal:${modal.dataset.modalProductId || 'unknown'}`);
   };
+
+  document.addEventListener('input', (e) => {
+    const calc = e.target.closest('.product-price-calculator');
+    if (calc) updateProductCalculator(calc);
+  });
 
   document.addEventListener('click', function(e) {
     const card = e.target.closest('.product-card');
@@ -26,6 +61,7 @@ export function initProductModals() {
           modal.classList.contains('modal-overlay') &&
           modal.dataset.modalProductId === productId) {
         openModal(modal);
+        initCalculatorInModal(modal);
       }
       // Вариант 2 (более надёжный, если структура изменится):
       // const modal = card.parentElement?.querySelector(`.modal-overlay[data-modal-product-id="${productId}"]`);
